@@ -22,7 +22,7 @@ UI_PORT="${UI_PORT:-3000}"
 UI_URL="http://localhost:$UI_PORT"
 MAIC_PORT="${OPENMAIC_PORT:-3100}"
 MAIC_DIR="$ROOT/vendor/openmaic"
-ANTHROPIC_PROXY_PORT="${ANTHROPIC_PROXY_PORT:-3101}"
+SUB_PROXY_PORT="${SUBSCRIPTION_PROXY_PORT:-3101}"
 
 # GUI launches do not inherit the shell PATH.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
@@ -126,8 +126,8 @@ start() {
     wait_port frontend "$UI_PORT" 60 || return 1
   fi
 
-  # 5. Claude-subscription bridge for OpenMAIC (optional)
-  start_anthropic_proxy || log "⚠️  anthropic proxy not started; Claude models unavailable in Learn"
+  # 5. Subscription bridge (ChatGPT + Claude OAuth) for OpenMAIC (optional)
+  start_subscription_proxy || log "⚠️  subscription proxy not started; subscription models unavailable in Learn"
 
   # 6. OpenMAIC (Learn feature) — optional; skipped if the submodule is missing
   start_openmaic || log "⚠️  OpenMAIC not started; the Learn tab will be unavailable"
@@ -136,16 +136,15 @@ start() {
   echo "$UI_URL"
 }
 
-start_anthropic_proxy() {
-  # Bridges OpenMAIC's Anthropic provider to a Claude subscription (OAuth) using Hermes' credentials.
+start_subscription_proxy() {
+  # Bridges OpenMAIC to ChatGPT (Codex) + Claude subscriptions using Hermes' OAuth credentials, with failover.
   local py="$HOME/.hermes/hermes-agent/.venv/bin/python"
-  [ -x "$py" ] || py="$(command -v python3)"
-  [ -f "$HOME/.claude/.credentials.json" ] || [ -f "$HOME/.hermes/auth.json" ] || { log "• no Claude OAuth credentials; anthropic proxy skipped"; return 1; }
-  if port_busy "$ANTHROPIC_PROXY_PORT" && ! alive anthropic-proxy; then
-    log "• anthropic proxy port $ANTHROPIC_PROXY_PORT already in use — reusing"
+  [ -x "$py" ] || { log "• Hermes venv not found; subscription proxy skipped"; return 1; }
+  if port_busy "$SUB_PROXY_PORT" && ! alive subscription-proxy; then
+    log "• subscription proxy port $SUB_PROXY_PORT already in use — reusing"
   else
-    start_bg anthropic-proxy "$py" "$ROOT/scripts/app/anthropic-oauth-proxy.py" --port "$ANTHROPIC_PROXY_PORT"
-    wait_port anthropic-proxy "$ANTHROPIC_PROXY_PORT" 20 || return 1
+    start_bg subscription-proxy "$py" "$ROOT/scripts/app/subscription-proxy.py" --port "$SUB_PROXY_PORT"
+    wait_port subscription-proxy "$SUB_PROXY_PORT" 30 || return 1
   fi
 }
 
@@ -175,12 +174,17 @@ start_openmaic() {
         default_model="openai:z-ai/glm-5.3"
       fi
       echo
-      echo "# --- Claude subscription (OAuth) via the local anthropic-oauth-proxy started by this launcher."
-      echo "# Fallback when the primary provider is unavailable; use e.g. DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001"
-      echo "ANTHROPIC_API_KEY=oauth-proxy"
-      echo "ANTHROPIC_BASE_URL=http://127.0.0.1:$ANTHROPIC_PROXY_PORT/v1"
+      echo "# --- Subscriptions (OAuth, no API keys) via the local subscription-proxy started by this launcher."
+      echo "# ChatGPT (Codex) + Claude through an OpenAI-compatible endpoint WITH automatic failover"
+      echo "# (order: requested model -> gpt-5.5 -> claude-haiku-4-5). Registered as the 'openrouter' provider slot."
+      echo "OPENROUTER_API_KEY=subscription"
+      echo "OPENROUTER_BASE_URL=http://127.0.0.1:$SUB_PROXY_PORT/v1"
+      echo "OPENROUTER_MODELS=gpt-5.5,gpt-5.6,gpt-6-astra,claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
+      echo "# Claude subscription, native Anthropic API (streaming, thinking) — failover only within Claude models"
+      echo "ANTHROPIC_API_KEY=subscription"
+      echo "ANTHROPIC_BASE_URL=http://127.0.0.1:$SUB_PROXY_PORT/v1"
       echo "ANTHROPIC_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
-      [ -z "$default_model" ] && default_model="anthropic:claude-haiku-4-5-20251001"
+      [ -z "$default_model" ] && default_model="openrouter:gpt-5.5"
       echo
       echo "DEFAULT_MODEL=$default_model"
       echo "# Let Open Notebook embed classrooms in its Learn dialog"
@@ -222,22 +226,22 @@ stop_one() {
 }
 
 stop() {
-  for n in openmaic anthropic-proxy frontend worker api surrealdb; do stop_one "$n"; done
+  for n in openmaic subscription-proxy frontend worker api surrealdb; do stop_one "$n"; done
   # safety net: anything still holding our ports that we spawned from this repo
   pkill -f "$ROOT/frontend/.next/standalone/.*server.js" 2>/dev/null
   pkill -f "uvicorn api.main:app --host 127.0.0.1 --port $API_PORT" 2>/dev/null
   pkill -f "surreal-commands-worker --import-modules commands" 2>/dev/null
   pkill -f "rocksdb://$DB_DIR/open_notebook.db" 2>/dev/null
-  pkill -f "$ROOT/scripts/app/anthropic-oauth-proxy.py" 2>/dev/null
+  pkill -f "$ROOT/scripts/app/subscription-proxy.py" 2>/dev/null
   pkill -f "next start.*$MAIC_DIR\|$MAIC_DIR/node_modules/.*next" 2>/dev/null
   log "🛑 Open Notebook stopped"
 }
 
 status() {
-  for n in surrealdb api worker frontend anthropic-proxy openmaic; do
+  for n in surrealdb api worker frontend subscription-proxy openmaic; do
     if alive "$n"; then echo "$n: running (pid $(pid_of "$n"))"; else echo "$n: stopped"; fi
   done
-  for p in "$SURREAL_PORT" "$API_PORT" "$UI_PORT" "$ANTHROPIC_PROXY_PORT" "$MAIC_PORT"; do port_busy "$p" && echo "port $p: listening" || echo "port $p: free"; done
+  for p in "$SURREAL_PORT" "$API_PORT" "$UI_PORT" "$SUB_PROXY_PORT" "$MAIC_PORT"; do port_busy "$p" && echo "port $p: listening" || echo "port $p: free"; done
 }
 
 case "${1:-}" in

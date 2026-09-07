@@ -52,19 +52,28 @@ ALLOWED_FRAME_ANCESTORS=http://localhost:3000   # baked at build time
 `ALLOWED_FRAME_ANCESTORS` is read by OpenMAIC's `next.config.ts` **at build
 time**; the launcher rebuilds when the UI origin changes.
 
-### Claude subscription (OAuth) as a provider
+### Subscription models (ChatGPT + Claude OAuth) with failover
 
-OpenMAIC's Anthropic provider only takes API keys, so the launcher also starts
-`scripts/app/anthropic-oauth-proxy.py` on port 3101. It resolves the Claude
-Code / Hermes OAuth token via Hermes' credential layer (`~/.claude/.credentials.json`,
-`~/.hermes/auth.json`; refresh included), forwards Messages API calls to
-`api.anthropic.com` as `Authorization: Bearer` with the Claude Code beta headers,
-user-agent and system prefix, and streams responses back. The generated
-`vendor/openmaic/.env` registers it as `ANTHROPIC_BASE_URL=http://127.0.0.1:3101/v1`
-with `ANTHROPIC_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1`.
-Use it as the default with `DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001`,
-or per stage via `MODEL_ROUTES`. Requires `~/.hermes/hermes-agent` (the proxy
-imports `agent.anthropic_credentials`).
+OpenMAIC only takes API keys, so the launcher starts
+`scripts/app/subscription-proxy.py` on port 3101. It reuses Hermes' credential
+layer (`~/.hermes/hermes-agent`) — the same OAuth tokens and refresh logic Hermes
+uses — so nothing is stored by the proxy:
+
+| Route | Upstream | Notes |
+|---|---|---|
+| `POST /v1/chat/completions` | ChatGPT/Codex OAuth (`gpt-5.5`, `gpt-5.6`, `gpt-6-astra`) or Claude OAuth (`claude-*`) | OpenAI-compatible; **automatic failover** through `FALLBACK_CHAIN` (default `codex:gpt-5.5,anthropic:claude-haiku-4-5-20251001`). Response header `x-proxy-served-by` tells you who answered; `x-proxy-failover` lists what failed. |
+| `POST /v1/messages` | Claude OAuth | Native Anthropic API (streaming/thinking preserved); failover only across Claude models. |
+| `GET /v1/models` | — | model list for OpenMAIC's probe |
+
+The generated `vendor/openmaic/.env` registers it twice: as the `openrouter`
+provider slot (OpenAI-compatible, all subscription models, failover) and as
+`anthropic` (native). Pick with e.g. `DEFAULT_MODEL=openrouter:gpt-5.5` or
+`anthropic:claude-sonnet-5`, or per stage via `MODEL_ROUTES`. Proxy env knobs:
+`CODEX_MODELS`, `ANTHROPIC_SUB_MODELS`, `FALLBACK_CHAIN`, `SUBSCRIPTION_PROXY_PORT`.
+
+Codex calls go through Hermes' Chat→Responses adapter, so streaming is
+synthesized after completion (OpenMAIC only needs the final text). Failover
+retries on 401/402/403/429/5xx, transport errors, and "model not supported".
 
 Open Notebook side env vars: `OPENMAIC_URL` (server-side, default
 `http://localhost:3100`), `OPENMAIC_PUBLIC_URL` (browser-facing, defaults to
