@@ -45,7 +45,7 @@ CODEX_MODELS = [m for m in os.environ.get("CODEX_MODELS", "gpt-5.5,gpt-5.6,gpt-6
 ANTHROPIC_MODELS = [
     m
     for m in os.environ.get(
-        "ANTHROPIC_SUB_MODELS", "claude-haiku-4-5-20251001,claude-sonnet-5"
+        "ANTHROPIC_SUB_MODELS", "claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
     ).split(",")
     if m
 ]
