@@ -23,6 +23,7 @@ import {
   useLearningSessions,
 } from '@/lib/hooks/use-learn'
 import type { LearningSession } from '@/lib/api/learn'
+import { ClassroomView } from '@/components/learn/ClassroomView'
 import { cn } from '@/lib/utils'
 
 interface LearnDialogProps {
@@ -136,12 +137,7 @@ export function LearnDialog({ notebookId, notebookName, open, onOpenChange }: Le
               </div>
             </div>
             {active.classroom_url ? (
-              <iframe
-                src={active.classroom_url}
-                title={active.title}
-                className="flex-1 w-full rounded-md border bg-background"
-                allow="microphone; autoplay; fullscreen"
-              />
+              <ClassroomView session={active} className="flex-1 min-h-0" />
             ) : (
               <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
                 {active.error ?? active.message ?? t('learn.notReady')}

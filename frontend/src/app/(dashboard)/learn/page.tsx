@@ -13,6 +13,7 @@ import { useTranslation } from '@/lib/hooks/use-translation'
 import { useNotebooks } from '@/lib/hooks/use-notebooks'
 import { useAllLearningSessions, useDeleteLearningSession, useLearnStatus } from '@/lib/hooks/use-learn'
 import { LearnDialog } from '../notebooks/components/LearnDialog'
+import { ClassroomView } from '@/components/learn/ClassroomView'
 import type { LearningSession } from '@/lib/api/learn'
 import { cn } from '@/lib/utils'
 
@@ -70,12 +71,7 @@ export default function LearnPage() {
                   </Button>
                 </div>
               </div>
-              <iframe
-                src={active.classroom_url}
-                title={active.title}
-                className="flex-1 w-full rounded-xl border bg-background"
-                allow="microphone; autoplay; fullscreen"
-              />
+              <ClassroomView session={active} className="flex-1 min-h-0" />
             </div>
           ) : (
             <div className="max-w-5xl mx-auto space-y-6">

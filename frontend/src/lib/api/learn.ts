@@ -38,6 +38,13 @@ export interface LearningSessionCreate {
   live_retrieval?: boolean
 }
 
+export interface ClassroomDocument {
+  id: string
+  stage: { id: string; name?: string; style?: string }
+  scenes: import('@openmaic/dsl').Scene[]
+  createdAt?: string
+}
+
 export interface LearningStatus {
   available: boolean
   url: string
@@ -69,6 +76,11 @@ export const learnApi = {
 
   get: async (sessionId: string) => {
     const response = await apiClient.get<LearningSession>(`/learn/${sessionId}`)
+    return response.data
+  },
+
+  classroom: async (sessionId: string) => {
+    const response = await apiClient.get<ClassroomDocument>(`/learn/${sessionId}/classroom`)
     return response.data
   },
 

@@ -106,5 +106,16 @@ details on demand, so notebooks larger than the prompt work.
 
 ## Roadmap
 
-- Replace the iframe with `@openmaic/renderer` for a native in-app view.
+
 - Per-notebook default model / TTS voice.
+
+## Native player
+
+Ready classrooms open in an in-app player (`frontend/src/components/learn/ClassroomPlayer.tsx`)
+built on `@openmaic/renderer`'s `SlideCanvas`: it fetches the classroom document through
+`GET /api/learn/{session}/classroom` (proxied from the sidecar's `/api/classroom?id=`), steps
+through narration (`speech` actions) with `spotlight` / `laser` effects, autoplays at reading
+speed, supports keyboard navigation, and renders quiz scenes with grading and explanations.
+A **Full classroom** toggle falls back to the OpenMAIC iframe for multi-agent discussion,
+whiteboard and interactive/PBL scenes. `echarts` and `shiki` are installed for chart/code
+elements.

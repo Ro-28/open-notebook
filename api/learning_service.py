@@ -8,6 +8,7 @@ job API, and track the job on a `learning_session` record.
 """
 
 import asyncio
+import json
 import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
@@ -403,3 +404,30 @@ async def learn_reference(record_id: str) -> Dict[str, Any]:
     else:
         raise InvalidInputError(f"Unsupported reference type: {table}")
     return PlainTextResponse(body[:200_000])  # type: ignore[return-value]
+
+
+async def get_classroom_document(session_id: str) -> Dict[str, Any]:
+    """Fetch the classroom JSON (stage + scenes) from OpenMAIC for native rendering."""
+    session = await get_learning_session(session_id, refresh=False)
+    if not session.classroom_id:
+        raise NotFoundError("Classroom is not ready yet")
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            r = await client.get(
+                f"{openmaic_url()}/api/classroom", params={"id": session.classroom_id}, headers=_headers()
+            )
+    except httpx.HTTPError as e:
+        raise ExternalServiceError(f"OpenMAIC unreachable: {e}") from e
+    if r.status_code == 404:
+        raise NotFoundError("Classroom not found in OpenMAIC (was its data folder cleared?)")
+    if r.status_code >= 400:
+        raise ExternalServiceError(f"OpenMAIC returned {r.status_code}: {r.text[:300]}")
+    body = r.json()
+    doc = body.get("classroom") or body.get("data", {}).get("classroom") or body
+    # Absolute-ize media paths the sidecar serves (images, audio) so the browser can load them.
+    public = public_openmaic_url()
+    text = json.dumps(doc)
+    text = text.replace('"/classroom-media/', f'"{public}/classroom-media/').replace(
+        '"/api/classroom-media/', f'"{public}/api/classroom-media/'
+    )
+    return json.loads(text)

@@ -98,6 +98,12 @@ async def learn_reference(record_id: str):
     return await learning_service.learn_reference(record_id)
 
 
+@router.get("/learn/{session_id}/classroom")
+async def get_classroom(session_id: str):
+    """Classroom document (stage + scenes) for the in-app renderer."""
+    return await learning_service.get_classroom_document(session_id)
+
+
 @router.get("/learn/{session_id}", response_model=LearningSessionResponse)
 async def get_session(session_id: str):
     return _to_response(await learning_service.get_learning_session(session_id))

@@ -41,6 +41,15 @@ export function useLearningSessions(notebookId: string, enabled = true) {
   })
 }
 
+export function useClassroomDocument(sessionId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['learn', 'classroom', sessionId],
+    queryFn: () => learnApi.classroom(sessionId as string),
+    enabled: !!sessionId,
+    staleTime: 10 * 60 * 1000,
+  })
+}
+
 export function useCreateLearningSession(notebookId: string) {
   const queryClient = useQueryClient()
   const { toast } = useToast()
