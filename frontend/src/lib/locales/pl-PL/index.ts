@@ -1017,4 +1017,12 @@ export const plPL = {
       failed: "Błąd",
     },
   },
+  app: {
+    quit: "Zamknij Open Notebook",
+    quitting: "Zamykanie…",
+    quittingDesc: "Zatrzymywanie bazy danych, API, workera, interfejsu i usługi nauki.",
+    stopped: "Open Notebook został zamknięty",
+    stoppedDesc: "Wszystkie lokalne usługi zostały zatrzymane. Kliknij dwukrotnie aplikację, aby uruchomić ponownie.",
+    quitFailed: "Nie udało się zamknąć",
+  },
 } satisfies TranslationShape;

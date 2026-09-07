@@ -24,6 +24,9 @@ MAIC_PORT="${OPENMAIC_PORT:-3100}"
 MAIC_DIR="$ROOT/vendor/openmaic"
 SUB_PROXY_PORT="${SUBSCRIPTION_PROXY_PORT:-3101}"
 
+# Tell the API it runs under this launcher (enables POST /api/app/shutdown from the UI).
+export OPEN_NOTEBOOK_LAUNCHER_SCRIPT="$ROOT/scripts/app/open-notebook.sh"
+
 # GUI launches do not inherit the shell PATH.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
 cd "$ROOT" || exit 1
@@ -234,6 +237,8 @@ stop() {
   pkill -f "rocksdb://$DB_DIR/open_notebook.db" 2>/dev/null
   pkill -f "$ROOT/scripts/app/subscription-proxy.py" 2>/dev/null
   pkill -f "next start.*$MAIC_DIR\|$MAIC_DIR/node_modules/.*next" 2>/dev/null
+  # Close the menu/dock launcher app if it is running (it stops nothing itself once we are done).
+  pkill -f "Open Notebook.app/Contents/MacOS/applet" 2>/dev/null
   log "🛑 Open Notebook stopped"
 }
 

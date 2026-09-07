@@ -1,24 +1,16 @@
 -- Open Notebook launcher (macOS stay-open applet).
--- Launch: starts SurrealDB + API + worker + UI via scripts/app/open-notebook.sh and opens the browser.
--- The app stays in the Dock while running. Quit it (Quit button, Cmd-Q, or Dock > Quit) to stop every service.
--- Clicking the Dock icon again re-opens the control dialog.
+-- Launch: starts SurrealDB + API + worker + UI + Learn sidecar via scripts/app/open-notebook.sh and
+-- opens the browser. No dialog: the app just sits in the Dock while services run.
+-- Quit from the web UI ("Quit Open Notebook" in the sidebar), Cmd-Q, or Dock > Quit stops every service.
+-- Clicking the Dock icon again re-opens the UI in the browser.
 
 property projectRoot : "/Users/roberto/Projects/open-notebook"
 property uiURL : "http://localhost:3000"
+property stopping : false
 
 on ctl(cmd)
 	return do shell script "/bin/bash " & quoted form of (projectRoot & "/scripts/app/open-notebook.sh") & " " & cmd & " 2>&1"
 end ctl
-
-on showControl()
-	set r to display dialog "Open Notebook is running." & return & return & uiURL & return & "API: http://localhost:5055" & return & "Learn (OpenMAIC): http://localhost:3100  ·  subscription proxy :3101" & return & return & "Quitting this app shuts down all services." buttons {"Show Logs", "Quit Open Notebook", "Keep Running"} default button "Keep Running" with title "Open Notebook" with icon note
-	set b to button returned of r
-	if b is "Quit Open Notebook" then
-		quit
-	else if b is "Show Logs" then
-		do shell script "open " & quoted form of (projectRoot & "/data/app/logs")
-	end if
-end showControl
 
 on run
 	try
@@ -30,20 +22,29 @@ on run
 		return
 	end try
 	open location uiURL
-	showControl()
 end run
 
 on idle
-	return 60
+	-- If the services were stopped from the web UI, exit quietly.
+	try
+		set st to ctl("status")
+		if st contains "api: stopped" then
+			set stopping to true
+			quit
+		end if
+	end try
+	return 5
 end idle
 
 on reopen
-	showControl()
+	open location uiURL
 end reopen
 
 on quit
-	try
-		ctl("stop")
-	end try
+	if not stopping then
+		try
+			ctl("stop")
+		end try
+	end if
 	continue quit
 end quit

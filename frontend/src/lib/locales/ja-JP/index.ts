@@ -1017,4 +1017,12 @@ export const jaJP = {
       failed: "失敗",
     },
   },
+  app: {
+    quit: "Open Notebook を終了",
+    quitting: "終了中…",
+    quittingDesc: "データベース、API、ワーカー、UI、学習サービスを停止しています。",
+    stopped: "Open Notebook を終了しました",
+    stoppedDesc: "すべてのローカルサービスを停止しました。再開するにはアプリをダブルクリックしてください。",
+    quitFailed: "終了できませんでした",
+  },
 } satisfies TranslationShape;

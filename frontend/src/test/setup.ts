@@ -63,3 +63,9 @@ vi.mock('@/lib/hooks/use-create-dialogs', () => ({
     openPodcastDialog: vi.fn(),
   })),
 }))
+
+// Mock @/lib/hooks/use-launcher (local launcher quit button; needs a QueryClient otherwise)
+vi.mock('@/lib/hooks/use-launcher', () => ({
+  useLauncherStatus: vi.fn(() => ({ data: { launcher: false, can_shutdown: false }, isLoading: false })),
+  useShutdownApp: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+}))

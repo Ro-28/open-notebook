@@ -1017,4 +1017,12 @@ export const zhCN = {
       failed: "失败",
     },
   },
+  app: {
+    quit: "退出 Open Notebook",
+    quitting: "正在关闭…",
+    quittingDesc: "正在停止数据库、API、后台任务、界面和学习服务。",
+    stopped: "Open Notebook 已关闭",
+    stoppedDesc: "所有本地服务已停止。双击应用即可重新启动。",
+    quitFailed: "无法关闭",
+  },
 } satisfies TranslationShape;

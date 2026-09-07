@@ -1017,4 +1017,12 @@ export const frFR = {
       failed: "Échec",
     },
   },
+  app: {
+    quit: "Quitter Open Notebook",
+    quitting: "Arrêt en cours…",
+    quittingDesc: "Arrêt de la base de données, de l'API, du worker, de l'interface et du service Apprendre.",
+    stopped: "Open Notebook a été arrêté",
+    stoppedDesc: "Tous les services locaux sont arrêtés. Double-cliquez sur l'app pour redémarrer.",
+    quitFailed: "Impossible d'arrêter",
+  },
 } satisfies TranslationShape;

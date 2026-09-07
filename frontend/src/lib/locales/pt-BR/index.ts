@@ -1017,4 +1017,12 @@ export const ptBR = {
       failed: "Falhou",
     },
   },
+  app: {
+    quit: "Sair do Open Notebook",
+    quitting: "Encerrando…",
+    quittingDesc: "Parando o banco de dados, a API, o worker, a interface e o serviço Aprender.",
+    stopped: "O Open Notebook foi encerrado",
+    stoppedDesc: "Todos os serviços locais foram parados. Clique duas vezes no app para iniciar novamente.",
+    quitFailed: "Não foi possível encerrar",
+  },
 } satisfies TranslationShape;

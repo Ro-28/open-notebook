@@ -1017,4 +1017,12 @@ export const trTR = {
       failed: "Başarısız",
     },
   },
+  app: {
+    quit: "Open Notebook'tan çık",
+    quitting: "Kapatılıyor…",
+    quittingDesc: "Veritabanı, API, worker, arayüz ve Öğren servisi durduruluyor.",
+    stopped: "Open Notebook kapatıldı",
+    stoppedDesc: "Tüm yerel servisler durduruldu. Yeniden başlatmak için uygulamaya çift tıklayın.",
+    quitFailed: "Kapatılamadı",
+  },
 } satisfies TranslationShape;

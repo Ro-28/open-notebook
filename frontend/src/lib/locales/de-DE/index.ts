@@ -1020,4 +1020,12 @@ export const deDE = {
       failed: "Fehlgeschlagen",
     },
   },
+  app: {
+    quit: "Open Notebook beenden",
+    quitting: "Wird beendet…",
+    quittingDesc: "Datenbank, API, Worker, Oberfläche und Lern-Dienst werden gestoppt.",
+    stopped: "Open Notebook wurde beendet",
+    stoppedDesc: "Alle lokalen Dienste wurden gestoppt. Doppelklicke die App, um neu zu starten.",
+    quitFailed: "Beenden fehlgeschlagen",
+  },
 } satisfies TranslationShape;

@@ -1017,4 +1017,12 @@ export const zhTW = {
       failed: "失敗",
     },
   },
+  app: {
+    quit: "結束 Open Notebook",
+    quitting: "正在關閉…",
+    quittingDesc: "正在停止資料庫、API、背景工作、介面與學習服務。",
+    stopped: "Open Notebook 已關閉",
+    stoppedDesc: "所有本機服務已停止。連按兩下應用程式即可重新啟動。",
+    quitFailed: "無法關閉",
+  },
 } satisfies TranslationShape;

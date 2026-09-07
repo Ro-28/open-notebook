@@ -1018,4 +1018,12 @@ export const esES = {
       failed: "Error",
     },
   },
+  app: {
+    quit: "Salir de Open Notebook",
+    quitting: "Apagando…",
+    quittingDesc: "Deteniendo la base de datos, la API, el worker, la interfaz y el servicio Aprender.",
+    stopped: "Open Notebook se ha cerrado",
+    stoppedDesc: "Todos los servicios locales se detuvieron. Haz doble clic en la app para volver a iniciarla.",
+    quitFailed: "No se pudo apagar",
+  },
 } satisfies TranslationShape;

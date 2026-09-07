@@ -1017,4 +1017,12 @@ export const caES = {
       failed: "Error",
     },
   },
+  app: {
+    quit: "Surt d'Open Notebook",
+    quitting: "Aturant…",
+    quittingDesc: "Aturant la base de dades, l'API, el worker, la interfície i el servei Aprèn.",
+    stopped: "Open Notebook s'ha tancat",
+    stoppedDesc: "Tots els serveis locals s'han aturat. Fes doble clic a l'app per tornar a iniciar.",
+    quitFailed: "No s'ha pogut aturar",
+  },
 } satisfies TranslationShape;

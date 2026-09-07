@@ -1017,4 +1017,12 @@ export const ruRU = {
       failed: "Ошибка",
     },
   },
+  app: {
+    quit: "Выйти из Open Notebook",
+    quitting: "Завершение…",
+    quittingDesc: "Останавливаются база данных, API, воркер, интерфейс и сервис обучения.",
+    stopped: "Open Notebook остановлен",
+    stoppedDesc: "Все локальные сервисы остановлены. Дважды щёлкните приложение, чтобы запустить снова.",
+    quitFailed: "Не удалось завершить",
+  },
 } satisfies TranslationShape;

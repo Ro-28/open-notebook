@@ -1017,4 +1017,12 @@ export const itIT = {
       failed: "Errore",
     },
   },
+  app: {
+    quit: "Esci da Open Notebook",
+    quitting: "Chiusura in corso…",
+    quittingDesc: "Arresto di database, API, worker, interfaccia e servizio Impara.",
+    stopped: "Open Notebook è stato chiuso",
+    stoppedDesc: "Tutti i servizi locali sono stati arrestati. Fai doppio clic sull'app per riavviare.",
+    quitFailed: "Impossibile chiudere",
+  },
 } satisfies TranslationShape;

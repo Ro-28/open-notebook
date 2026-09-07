@@ -1016,6 +1016,14 @@ export const enUS = {
       failed: "Failed",
     },
   },
+  app: {
+    quit: "Quit Open Notebook",
+    quitting: "Shutting down…",
+    quittingDesc: "Stopping the database, API, worker, UI and Learn services.",
+    stopped: "Open Notebook has been shut down",
+    stoppedDesc: "All local services were stopped. Double-click the app to start again.",
+    quitFailed: "Could not shut down",
+  },
 }
 
 // Compile-time shape of the en-US translations. Every other locale must

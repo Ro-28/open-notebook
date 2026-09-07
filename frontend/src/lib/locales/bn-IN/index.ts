@@ -1018,4 +1018,12 @@ export const bnIN = {
       failed: "ব্যর্থ",
     },
   },
+  app: {
+    quit: "Open Notebook বন্ধ করুন",
+    quitting: "বন্ধ হচ্ছে…",
+    quittingDesc: "ডেটাবেস, API, ওয়ার্কার, ইন্টারফেস ও শেখার সার্ভিস বন্ধ করা হচ্ছে।",
+    stopped: "Open Notebook বন্ধ করা হয়েছে",
+    stoppedDesc: "সব লোকাল সার্ভিস বন্ধ হয়েছে। আবার চালু করতে অ্যাপে ডাবল-ক্লিক করুন।",
+    quitFailed: "বন্ধ করা যায়নি",
+  },
 } satisfies TranslationShape;

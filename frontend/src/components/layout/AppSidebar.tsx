@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { useLauncherStatus, useShutdownApp } from '@/lib/hooks/use-launcher'
 import { useSidebarStore } from '@/lib/stores/sidebar-store'
 import { useCreateDialogs } from '@/lib/hooks/use-create-dialogs'
 import {
@@ -33,7 +34,7 @@ import {
   Bot,
   Shuffle,
   Settings,
-  LogOut,
+  LogOut, Power,
   ChevronLeft,
   Menu,
   FileText,
@@ -91,6 +92,9 @@ export function AppSidebar() {
   const navigation = getNavigation(t)
   const pathname = usePathname()
   const { logout } = useAuth()
+  const launcher = useLauncherStatus()
+  const shutdown = useShutdownApp()
+  const canQuit = launcher.data?.can_shutdown === true
   const { isCollapsed, toggleCollapse } = useSidebarStore()
   const { openSourceDialog, openNotebookDialog, openPodcastDialog } = useCreateDialogs()
 
@@ -362,6 +366,36 @@ export function AppSidebar() {
               </>
             )}
           </div>
+
+          {canQuit && (
+            isCollapsed ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center sidebar-menu-item text-destructive hover:text-destructive mb-2"
+                    onClick={() => shutdown.mutate()}
+                    disabled={shutdown.isPending}
+                    aria-label={t('app.quit')}
+                  >
+                    <Power className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">{t('app.quit')}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 sidebar-menu-item text-destructive hover:text-destructive mb-2"
+                onClick={() => shutdown.mutate()}
+                disabled={shutdown.isPending}
+                aria-label={t('app.quit')}
+              >
+                <Power className="h-4 w-4" />
+                {t('app.quit')}
+              </Button>
+            )
+          )}
 
           {isCollapsed ? (
             <Tooltip>
