@@ -22,6 +22,7 @@ UI_PORT="${UI_PORT:-3000}"
 UI_URL="http://localhost:$UI_PORT"
 MAIC_PORT="${OPENMAIC_PORT:-3100}"
 MAIC_DIR="$ROOT/vendor/openmaic"
+ANTHROPIC_PROXY_PORT="${ANTHROPIC_PROXY_PORT:-3101}"
 
 # GUI launches do not inherit the shell PATH.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
@@ -125,11 +126,27 @@ start() {
     wait_port frontend "$UI_PORT" 60 || return 1
   fi
 
-  # 5. OpenMAIC (Learn feature) — optional; skipped if the submodule is missing
+  # 5. Claude-subscription bridge for OpenMAIC (optional)
+  start_anthropic_proxy || log "⚠️  anthropic proxy not started; Claude models unavailable in Learn"
+
+  # 6. OpenMAIC (Learn feature) — optional; skipped if the submodule is missing
   start_openmaic || log "⚠️  OpenMAIC not started; the Learn tab will be unavailable"
 
   log "✅ Open Notebook is up: $UI_URL  (API http://localhost:$API_PORT, Learn http://localhost:$MAIC_PORT)"
   echo "$UI_URL"
+}
+
+start_anthropic_proxy() {
+  # Bridges OpenMAIC's Anthropic provider to a Claude subscription (OAuth) using Hermes' credentials.
+  local py="$HOME/.hermes/hermes-agent/.venv/bin/python"
+  [ -x "$py" ] || py="$(command -v python3)"
+  [ -f "$HOME/.claude/.credentials.json" ] || [ -f "$HOME/.hermes/auth.json" ] || { log "• no Claude OAuth credentials; anthropic proxy skipped"; return 1; }
+  if port_busy "$ANTHROPIC_PROXY_PORT" && ! alive anthropic-proxy; then
+    log "• anthropic proxy port $ANTHROPIC_PROXY_PORT already in use — reusing"
+  else
+    start_bg anthropic-proxy "$py" "$ROOT/scripts/app/anthropic-oauth-proxy.py" --port "$ANTHROPIC_PROXY_PORT"
+    wait_port anthropic-proxy "$ANTHROPIC_PROXY_PORT" 20 || return 1
+  fi
 }
 
 start_openmaic() {
@@ -138,32 +155,37 @@ start_openmaic() {
     log "Creating vendor/openmaic/.env"
     # Read a key from the environment or ~/.hermes/.env
     read_key() { local v="${!1:-}"; [ -z "$v" ] && [ -f "$HOME/.hermes/.env" ] && v="$(grep -E "^$1=" "$HOME/.hermes/.env" | head -1 | cut -d= -f2- | tr -d '"'"'"'')"; printf '%s' "$v"; }
-    local ollama_key cline_key
+    local ollama_key cline_key default_model=""
     ollama_key="$(read_key OLLAMA_API_KEY)"; cline_key="$(read_key CLINE_API_KEY)"
-    if [ -n "$ollama_key" ]; then
-      cat >"$MAIC_DIR/.env" <<EOF
-# OpenMAIC sidecar config for Open Notebook's Learn feature (generated; edit freely).
-# Ollama Cloud, OpenAI-compatible endpoint.
-OPENAI_API_KEY=$ollama_key
-OPENAI_BASE_URL=https://ollama.com/v1
-# Free tier: gpt-oss:120b, gpt-oss:20b, gemma4:31b, nemotron-3-nano:30b. Paid: glm-5.3, deepseek-v4-flash:0731, kimi-k2.7-code ...
-OPENAI_MODELS=gpt-oss:120b,gpt-oss:20b,gemma4:31b,nemotron-3-nano:30b,glm-5.3,deepseek-v4-flash:0731
-DEFAULT_MODEL=openai:gpt-oss:120b
-# Let Open Notebook embed classrooms in its Learn dialog
-ALLOWED_FRAME_ANCESTORS=$UI_URL
-EOF
-    else
-      cat >"$MAIC_DIR/.env" <<EOF
-# OpenMAIC sidecar config for Open Notebook's Learn feature (generated; edit freely).
-# Cline relay, OpenAI-compatible endpoint. Set OPENAI_API_KEY if empty.
-OPENAI_API_KEY=$cline_key
-OPENAI_BASE_URL=https://api.cline.bot/api/v1
-OPENAI_MODELS=z-ai/glm-5.3,deepseek/deepseek-v4-flash-0731
-DEFAULT_MODEL=openai:z-ai/glm-5.3
-# Let Open Notebook embed classrooms in its Learn dialog
-ALLOWED_FRAME_ANCESTORS=$UI_URL
-EOF
-    fi
+    {
+      echo "# OpenMAIC sidecar config for Open Notebook's Learn feature (generated; edit freely)."
+      echo "# Model strings are provider:model. Resolution: MODEL_ROUTES > DEFAULT_MODEL."
+      echo
+      if [ -n "$ollama_key" ]; then
+        echo "# --- Ollama Cloud (OpenAI-compatible). Free tier: gpt-oss:120b, gpt-oss:20b, gemma4:31b, nemotron-3-nano:30b"
+        echo "OPENAI_API_KEY=$ollama_key"
+        echo "OPENAI_BASE_URL=https://ollama.com/v1"
+        echo "OPENAI_MODELS=gpt-oss:120b,gpt-oss:20b,gemma4:31b,nemotron-3-nano:30b,glm-5.3,deepseek-v4-flash:0731"
+        default_model="openai:gpt-oss:120b"
+      elif [ -n "$cline_key" ]; then
+        echo "# --- Cline relay (OpenAI-compatible)"
+        echo "OPENAI_API_KEY=$cline_key"
+        echo "OPENAI_BASE_URL=https://api.cline.bot/api/v1"
+        echo "OPENAI_MODELS=z-ai/glm-5.3,deepseek/deepseek-v4-flash-0731"
+        default_model="openai:z-ai/glm-5.3"
+      fi
+      echo
+      echo "# --- Claude subscription (OAuth) via the local anthropic-oauth-proxy started by this launcher."
+      echo "# Fallback when the primary provider is unavailable; use e.g. DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001"
+      echo "ANTHROPIC_API_KEY=oauth-proxy"
+      echo "ANTHROPIC_BASE_URL=http://127.0.0.1:$ANTHROPIC_PROXY_PORT/v1"
+      echo "ANTHROPIC_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
+      [ -z "$default_model" ] && default_model="anthropic:claude-haiku-4-5-20251001"
+      echo
+      echo "DEFAULT_MODEL=$default_model"
+      echo "# Let Open Notebook embed classrooms in its Learn dialog"
+      echo "ALLOWED_FRAME_ANCESTORS=$UI_URL"
+    } >"$MAIC_DIR/.env"
   fi
   if [ ! -d "$MAIC_DIR/node_modules" ]; then
     log "Installing OpenMAIC deps (pnpm install, ~1 min)"
@@ -200,21 +222,22 @@ stop_one() {
 }
 
 stop() {
-  for n in openmaic frontend worker api surrealdb; do stop_one "$n"; done
+  for n in openmaic anthropic-proxy frontend worker api surrealdb; do stop_one "$n"; done
   # safety net: anything still holding our ports that we spawned from this repo
   pkill -f "$ROOT/frontend/.next/standalone/.*server.js" 2>/dev/null
   pkill -f "uvicorn api.main:app --host 127.0.0.1 --port $API_PORT" 2>/dev/null
   pkill -f "surreal-commands-worker --import-modules commands" 2>/dev/null
   pkill -f "rocksdb://$DB_DIR/open_notebook.db" 2>/dev/null
+  pkill -f "$ROOT/scripts/app/anthropic-oauth-proxy.py" 2>/dev/null
   pkill -f "next start.*$MAIC_DIR\|$MAIC_DIR/node_modules/.*next" 2>/dev/null
   log "🛑 Open Notebook stopped"
 }
 
 status() {
-  for n in surrealdb api worker frontend openmaic; do
+  for n in surrealdb api worker frontend anthropic-proxy openmaic; do
     if alive "$n"; then echo "$n: running (pid $(pid_of "$n"))"; else echo "$n: stopped"; fi
   done
-  for p in "$SURREAL_PORT" "$API_PORT" "$UI_PORT" "$MAIC_PORT"; do port_busy "$p" && echo "port $p: listening" || echo "port $p: free"; done
+  for p in "$SURREAL_PORT" "$API_PORT" "$UI_PORT" "$ANTHROPIC_PROXY_PORT" "$MAIC_PORT"; do port_busy "$p" && echo "port $p: listening" || echo "port $p: free"; done
 }
 
 case "${1:-}" in

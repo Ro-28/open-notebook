@@ -52,6 +52,20 @@ ALLOWED_FRAME_ANCESTORS=http://localhost:3000   # baked at build time
 `ALLOWED_FRAME_ANCESTORS` is read by OpenMAIC's `next.config.ts` **at build
 time**; the launcher rebuilds when the UI origin changes.
 
+### Claude subscription (OAuth) as a provider
+
+OpenMAIC's Anthropic provider only takes API keys, so the launcher also starts
+`scripts/app/anthropic-oauth-proxy.py` on port 3101. It resolves the Claude
+Code / Hermes OAuth token via Hermes' credential layer (`~/.claude/.credentials.json`,
+`~/.hermes/auth.json`; refresh included), forwards Messages API calls to
+`api.anthropic.com` as `Authorization: Bearer` with the Claude Code beta headers,
+user-agent and system prefix, and streams responses back. The generated
+`vendor/openmaic/.env` registers it as `ANTHROPIC_BASE_URL=http://127.0.0.1:3101/v1`
+with `ANTHROPIC_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1`.
+Use it as the default with `DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001`,
+or per stage via `MODEL_ROUTES`. Requires `~/.hermes/hermes-agent` (the proxy
+imports `agent.anthropic_credentials`).
+
 Open Notebook side env vars: `OPENMAIC_URL` (server-side, default
 `http://localhost:3100`), `OPENMAIC_PUBLIC_URL` (browser-facing, defaults to
 `OPENMAIC_URL`), `OPENMAIC_ACCESS_CODE` (sent as `x-access-code` if OpenMAIC
