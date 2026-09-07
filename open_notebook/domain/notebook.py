@@ -247,6 +247,12 @@ class Notebook(ObjectModel):
                 {"notebook_id": notebook_id},
             )
 
+            # Learn feature: drop classroom records generated from this notebook
+            await repo_query(
+                "DELETE learning_session WHERE notebook = $notebook_id",
+                {"notebook_id": notebook_id},
+            )
+
             # 2. Handle sources
             if delete_exclusive_sources:
                 # Find sources with count of references to OTHER notebooks

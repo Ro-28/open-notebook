@@ -71,6 +71,20 @@ Learn more about our project at [https://www.open-notebook.ai](https://www.open-
 
 ---
 
+## 🍃 This fork (Ro-28/open-notebook)
+
+Personal variant of Open Notebook, kept rebased on upstream. Additions:
+
+| Feature | Where |
+|---|---|
+| **macOS app** — double-click `Open Notebook.app` to start SurrealDB, API, worker, UI, the Learn sidecar and the subscription proxy; **Quit Open Notebook** in the sidebar stops everything | `scripts/app/` (`build-app.sh`, `open-notebook.sh start\|stop\|status\|logs`) |
+| **Learn** — turn a notebook into an interactive AI classroom (slides, AI teacher, quiz) powered by [OpenMAIC](https://github.com/THU-MAIC/OpenMAIC), embedded in the app | sidebar **Learn**, per-notebook **Learn** button; [docs](docs/7-DEVELOPMENT/learn-feature.md) |
+| **Subscription models, no API keys** — Claude (Claude Code OAuth) and ChatGPT (Codex OAuth) via a local proxy with automatic failover; Haiku is the default for every task | `scripts/app/subscription-proxy.py`, `scripts/app/configure-claude-default.sh` |
+| **Persistent error log** — API + worker warnings/errors in `data/logs/errors.log`, viewable under **Advanced → Recent errors** | `open_notebook/utils/error_log.py` |
+| **Soft Fern** visual refresh — rounded, layered, warmer surfaces | `DESIGN.md`, `frontend/src/app/globals.css` |
+
+Requires a checkout at `~/Projects/open-notebook`, Homebrew, `uv`, Node ≥ 22, `pnpm`, and a Hermes install at `~/.hermes/hermes-agent` (credential layer for the proxy). Embeddings use local Ollama (`nomic-embed-text`).
+
 ## 🆚 Open Notebook vs Google Notebook LM
 
 | Feature | Open Notebook | Google Notebook LM | Advantage |
