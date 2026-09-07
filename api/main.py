@@ -10,6 +10,12 @@ from open_notebook.utils.proxy import ensure_internal_no_proxy
 
 ensure_internal_no_proxy()
 
+# Persist WARNING+ to data/logs/errors.log for post-mortem debugging (bulk uploads etc.).
+# Must run before `commands` is imported (the worker package labels the sink "worker").
+from open_notebook.utils.error_log import setup_error_log  # noqa: E402
+
+setup_error_log("api")
+
 import asyncio
 import os
 from contextlib import asynccontextmanager

@@ -8,12 +8,18 @@ a loopback client so a LAN-exposed instance can never be stopped remotely.
 import os
 import subprocess
 from ipaddress import ip_address
+from typing import List, Optional
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Query, Request
 from loguru import logger
 from pydantic import BaseModel
 
 from open_notebook.exceptions import AuthenticationError, ConfigurationError
+from open_notebook.utils.error_log import (
+    clear_error_log,
+    error_log_path,
+    tail_error_log,
+)
 
 router = APIRouter(prefix="/app", tags=["app"])
 
@@ -21,6 +27,12 @@ router = APIRouter(prefix="/app", tags=["app"])
 class LauncherStatus(BaseModel):
     launcher: bool
     can_shutdown: bool
+
+
+class ErrorLogResponse(BaseModel):
+    path: str
+    count: int
+    records: List[str]
 
 
 def _launcher_script() -> str | None:
@@ -61,3 +73,19 @@ async def shutdown(request: Request):
         close_fds=True,
     )
     return {"status": "stopping"}
+
+
+@router.get("/errors", response_model=ErrorLogResponse)
+async def recent_errors(
+    lines: int = Query(200, ge=1, le=2000),
+    level: Optional[str] = Query(None, pattern="^(?i)(warning|error|critical)$"),
+):
+    """Tail of the persistent error log (API + worker), newest last."""
+    records = tail_error_log(lines=lines, level=level)
+    return ErrorLogResponse(path=str(error_log_path()), count=len(records), records=records)
+
+
+@router.delete("/errors", status_code=204)
+async def clear_errors():
+    clear_error_log()
+    return None

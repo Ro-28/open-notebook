@@ -8,6 +8,12 @@ from open_notebook.utils.proxy import ensure_internal_no_proxy
 
 ensure_internal_no_proxy()
 
+# The worker is a separate process: give it its own sink into the shared error log
+# (survives the blanket `logger.remove()` that content-core / surreal-commands perform).
+from open_notebook.utils.error_log import setup_error_log
+
+setup_error_log("worker")
+
 from .embedding_commands import (
     embed_insight_command,
     embed_note_command,
