@@ -997,6 +997,8 @@ export const caES = {
   },
   learn: {
     player: {
+      mute: "Silencia la narració",
+      unmute: "Activa la narració",
       modeNative: "Reproductor",
       modeFull: "Aula completa",
       loadFailed: "No s'ha pogut carregar el contingut de l'aula.",
@@ -1031,7 +1033,7 @@ export const caES = {
     includeSources: "Contingut de les fonts",
     includeInsights: "Anàlisis de les fonts",
     includeNotes: "Notes",
-    enableTts: "Generar veu del professor (TTS)",
+    enableTts: "Veu del professor (gratuïta, veus neuronals de Microsoft)",
     generate: "Generar aula",
     classrooms: "Aules",
     empty: "Encara no hi ha aules. Genera'n una a partir dels materials d'aquest quadern.",

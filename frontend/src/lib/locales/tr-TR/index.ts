@@ -997,6 +997,8 @@ export const trTR = {
   },
   learn: {
     player: {
+      mute: "Anlatımı sustur",
+      unmute: "Anlatımı aç",
       modeNative: "Oynatıcı",
       modeFull: "Tam sınıf",
       loadFailed: "Sınıf içeriği yüklenemedi.",
@@ -1031,7 +1033,7 @@ export const trTR = {
     includeSources: "Kaynak içeriği",
     includeInsights: "Kaynak içgörüleri",
     includeNotes: "Notlar",
-    enableTts: "Öğretmen sesi oluştur (TTS)",
+    enableTts: "Öğretmen sesi (ücretsiz, Microsoft nöral sesler)",
     generate: "Sınıf oluştur",
     classrooms: "Sınıflar",
     empty: "Henüz sınıf yok. Bu not defterinin materyallerinden bir tane oluşturun.",

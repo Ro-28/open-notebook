@@ -997,6 +997,8 @@ export const frFR = {
   },
   learn: {
     player: {
+      mute: "Couper la narration",
+      unmute: "Activer la narration",
       modeNative: "Lecteur",
       modeFull: "Classe complète",
       loadFailed: "Impossible de charger le contenu de la classe.",
@@ -1031,7 +1033,7 @@ export const frFR = {
     includeSources: "Contenu des sources",
     includeInsights: "Analyses des sources",
     includeNotes: "Notes",
-    enableTts: "Générer la voix du professeur (TTS)",
+    enableTts: "Voix du professeur (gratuite, voix neuronales Microsoft)",
     generate: "Générer la classe",
     classrooms: "Classes",
     empty: "Aucune classe pour l'instant. Générez-en une à partir des matériaux de ce carnet.",

@@ -997,6 +997,8 @@ export const ptBR = {
   },
   learn: {
     player: {
+      mute: "Silenciar narração",
+      unmute: "Ativar narração",
       modeNative: "Player",
       modeFull: "Sala completa",
       loadFailed: "Não foi possível carregar o conteúdo da sala.",
@@ -1031,7 +1033,7 @@ export const ptBR = {
     includeSources: "Conteúdo das fontes",
     includeInsights: "Insights das fontes",
     includeNotes: "Notas",
-    enableTts: "Gerar voz do professor (TTS)",
+    enableTts: "Voz do professor (grátis, vozes neurais da Microsoft)",
     generate: "Gerar sala de aula",
     classrooms: "Salas de aula",
     empty: "Nenhuma sala de aula ainda. Gere uma a partir dos materiais deste caderno.",

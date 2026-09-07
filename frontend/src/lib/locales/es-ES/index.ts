@@ -998,6 +998,8 @@ export const esES = {
   },
   learn: {
     player: {
+      mute: "Silenciar narración",
+      unmute: "Activar narración",
       modeNative: "Reproductor",
       modeFull: "Aula completa",
       loadFailed: "No se pudo cargar el contenido del aula.",
@@ -1032,7 +1034,7 @@ export const esES = {
     includeSources: "Contenido de las fuentes",
     includeInsights: "Análisis de las fuentes",
     includeNotes: "Notas",
-    enableTts: "Generar voz del profesor (TTS)",
+    enableTts: "Voz del profesor (gratis, voces neuronales de Microsoft)",
     generate: "Generar aula",
     classrooms: "Aulas",
     empty: "Aún no hay aulas. Genera una a partir de los materiales de este cuaderno.",

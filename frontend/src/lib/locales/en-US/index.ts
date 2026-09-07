@@ -996,6 +996,8 @@ export const enUS = {
   },
   learn: {
     player: {
+      mute: "Mute narration",
+      unmute: "Unmute narration",
       modeNative: "Player",
       modeFull: "Full classroom",
       loadFailed: "Could not load the classroom content.",
@@ -1030,7 +1032,7 @@ export const enUS = {
     includeSources: "Source content",
     includeInsights: "Source insights",
     includeNotes: "Notes",
-    enableTts: "Generate teacher voice (TTS)",
+    enableTts: "Teacher voice (free, Microsoft neural voices)",
     generate: "Generate classroom",
     classrooms: "Classrooms",
     empty: "No classrooms yet. Generate one from this notebook's materials.",

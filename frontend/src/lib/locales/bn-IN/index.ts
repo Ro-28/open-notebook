@@ -998,6 +998,8 @@ export const bnIN = {
   },
   learn: {
     player: {
+      mute: "বর্ণনা মিউট করুন",
+      unmute: "বর্ণনা চালু করুন",
       modeNative: "প্লেয়ার",
       modeFull: "সম্পূর্ণ ক্লাসরুম",
       loadFailed: "ক্লাসরুমের বিষয়বস্তু লোড করা যায়নি।",
@@ -1032,7 +1034,7 @@ export const bnIN = {
     includeSources: "সোর্সের বিষয়বস্তু",
     includeInsights: "সোর্স ইনসাইট",
     includeNotes: "নোট",
-    enableTts: "শিক্ষকের কণ্ঠ তৈরি করুন (TTS)",
+    enableTts: "শিক্ষকের কণ্ঠ (বিনামূল্যে, Microsoft নিউরাল ভয়েস)",
     generate: "ক্লাসরুম তৈরি করুন",
     classrooms: "ক্লাসরুম",
     empty: "এখনও কোনো ক্লাসরুম নেই। এই নোটবুকের উপকরণ থেকে একটি তৈরি করুন।",

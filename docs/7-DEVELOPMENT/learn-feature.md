@@ -119,3 +119,15 @@ speed, supports keyboard navigation, and renders quiz scenes with grading and ex
 A **Full classroom** toggle falls back to the OpenMAIC iframe for multi-agent discussion,
 whiteboard and interactive/PBL scenes. `echarts` and `shiki` are installed for chart/code
 elements.
+
+## Teacher voice (TTS)
+
+The subscription proxy also serves `POST /v1/audio/speech` (OpenAI shape) backed by
+**edge-tts** (Microsoft Edge neural voices, free, no key; already in Hermes' venv). The sidecar
+`.env` registers it as `TTS_OPENAI_BASE_URL=http://127.0.0.1:3101/v1`, so OpenMAIC's stock
+`openai-tts` provider works unchanged; OpenAI voice names (`alloy`, `nova`, …) map to Edge
+voices (`EDGE_VOICES` in `subscription-proxy.py`; default `EDGE_TTS_VOICE`). Generation with
+"Teacher voice" on (default) attaches an `audioUrl` to every `speech` action; the native
+player plays it and, in autoplay, advances on `ended` (reading-speed timing is the fallback
+when there is no audio or narration is muted). Browsers require a user gesture before audio
+starts — the first Play click counts.

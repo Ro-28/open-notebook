@@ -62,7 +62,7 @@ export function LearnDialog({ notebookId, notebookName, open, onOpenChange }: Le
   const [includeSources, setIncludeSources] = useState(true)
   const [includeInsights, setIncludeInsights] = useState(true)
   const [includeNotes, setIncludeNotes] = useState(true)
-  const [enableTts, setEnableTts] = useState(false)
+  const [enableTts, setEnableTts] = useState(true)
   const [liveRetrieval, setLiveRetrieval] = useState(true)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)

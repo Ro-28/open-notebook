@@ -997,6 +997,8 @@ export const zhTW = {
   },
   learn: {
     player: {
+      mute: "靜音講解",
+      unmute: "開啟講解",
       modeNative: "播放器",
       modeFull: "完整課堂",
       loadFailed: "無法載入課堂內容。",
@@ -1031,7 +1033,7 @@ export const zhTW = {
     includeSources: "來源內容",
     includeInsights: "來源洞察",
     includeNotes: "筆記",
-    enableTts: "產生教師語音（TTS）",
+    enableTts: "教師語音（免費，Microsoft 神經語音）",
     generate: "產生課堂",
     classrooms: "課堂",
     empty: "還沒有課堂。請根據此筆記本的材料產生一個。",

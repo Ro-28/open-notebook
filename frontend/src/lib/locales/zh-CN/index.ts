@@ -997,6 +997,8 @@ export const zhCN = {
   },
   learn: {
     player: {
+      mute: "静音讲解",
+      unmute: "开启讲解",
       modeNative: "播放器",
       modeFull: "完整课堂",
       loadFailed: "无法加载课堂内容。",
@@ -1031,7 +1033,7 @@ export const zhCN = {
     includeSources: "来源内容",
     includeInsights: "来源洞察",
     includeNotes: "笔记",
-    enableTts: "生成教师语音（TTS）",
+    enableTts: "教师语音（免费，Microsoft 神经语音）",
     generate: "生成课堂",
     classrooms: "课堂",
     empty: "还没有课堂。请根据此笔记本的材料生成一个。",

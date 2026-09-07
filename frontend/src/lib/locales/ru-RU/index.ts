@@ -997,6 +997,8 @@ export const ruRU = {
   },
   learn: {
     player: {
+      mute: "Выключить озвучку",
+      unmute: "Включить озвучку",
       modeNative: "Плеер",
       modeFull: "Полный класс",
       loadFailed: "Не удалось загрузить содержимое класса.",
@@ -1031,7 +1033,7 @@ export const ruRU = {
     includeSources: "Содержимое источников",
     includeInsights: "Инсайты источников",
     includeNotes: "Заметки",
-    enableTts: "Сгенерировать голос учителя (TTS)",
+    enableTts: "Голос учителя (бесплатно, нейроголоса Microsoft)",
     generate: "Создать класс",
     classrooms: "Классы",
     empty: "Классов пока нет. Создайте класс из материалов этого блокнота.",

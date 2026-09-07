@@ -997,6 +997,8 @@ export const plPL = {
   },
   learn: {
     player: {
+      mute: "Wycisz narrację",
+      unmute: "Włącz narrację",
       modeNative: "Odtwarzacz",
       modeFull: "Pełna klasa",
       loadFailed: "Nie udało się wczytać treści klasy.",
@@ -1031,7 +1033,7 @@ export const plPL = {
     includeSources: "Treść źródeł",
     includeInsights: "Wnioski ze źródeł",
     includeNotes: "Notatki",
-    enableTts: "Generuj głos nauczyciela (TTS)",
+    enableTts: "Głos nauczyciela (bezpłatnie, głosy neuronowe Microsoft)",
     generate: "Wygeneruj klasę",
     classrooms: "Klasy",
     empty: "Brak klas. Wygeneruj jedną z materiałów tego notatnika.",

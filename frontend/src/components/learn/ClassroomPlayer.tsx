@@ -8,10 +8,10 @@
  * fall back to the sidecar page via the "Open in new tab" link.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SlideCanvas, type SlideEffects } from '@openmaic/renderer'
 import type { Action, Scene, Slide, QuizQuestion } from '@openmaic/dsl'
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, GraduationCap, CheckCircle2, XCircle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, GraduationCap, CheckCircle2, XCircle, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -45,12 +45,14 @@ function effectsFromAction(action?: Action): SlideEffects {
 }
 
 /** Group actions into narration steps: each speech action carries the effects that precede it. */
+type SpeechWithAudio = Extract<Action, { type: 'speech' }> & { audioUrl?: string }
+
 function buildSteps(actions: Action[] | undefined) {
-  const steps: { speech?: string; effect?: Action }[] = []
+  const steps: { speech?: string; audioUrl?: string; effect?: Action }[] = []
   let pendingEffect: Action | undefined
   for (const a of actions ?? []) {
     if (a.type === 'speech') {
-      steps.push({ speech: a.text, effect: pendingEffect })
+      steps.push({ speech: a.text, audioUrl: (a as SpeechWithAudio).audioUrl, effect: pendingEffect })
       pendingEffect = undefined
     } else if (a.type === 'spotlight' || a.type === 'laser') {
       pendingEffect = a
@@ -74,6 +76,9 @@ export function ClassroomPlayer({
   const [sceneIdx, setSceneIdx] = useState(0)
   const [stepIdx, setStepIdx] = useState(0)
   const [playing, setPlaying] = useState(false)
+  const [muted, setMuted] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const hasAudio = useMemo(() => scenes.some((sc) => (sc.actions ?? []).some((a) => (a as SpeechWithAudio).audioUrl)), [scenes])
 
   const scene = scenes[sceneIdx]
   const steps = useMemo(() => buildSteps(scene?.actions as Action[] | undefined), [scene])
@@ -103,13 +108,33 @@ export function ClassroomPlayer({
     }
   }, [stepIdx, sceneIdx, scenes])
 
-  // Autoplay: advance after the narration's reading time.
+  // Narration audio: play the step's clip; when playing, advance on `ended`.
+  // Without audio (or muted), autoplay advances after the reading-time estimate.
   useEffect(() => {
-    if (!playing || !scene || scene.type !== 'slide') return
+    const el = audioRef.current
+    if (el) { el.pause(); el.removeAttribute('src'); el.load() }
+    if (!scene || scene.type !== 'slide') return
+    const url = step?.audioUrl
+    if (url && !muted && el) {
+      el.src = url
+      el.play().catch(() => { /* autoplay may be blocked until user interaction */ })
+      if (playing) {
+        const onEnded = () => next()
+        el.addEventListener('ended', onEnded)
+        return () => el.removeEventListener('ended', onEnded)
+      }
+      return
+    }
+    if (!playing) return
     const ms = step?.speech ? speechDurationMs(step.speech) : MIN_STEP_MS
     const id = setTimeout(next, ms)
     return () => clearTimeout(id)
-  }, [playing, scene, step, next])
+  }, [playing, muted, scene, step, next])
+
+  useEffect(() => {
+    if (!playing) audioRef.current?.pause()
+    else if (audioRef.current?.src && audioRef.current.paused) audioRef.current.play().catch(() => {})
+  }, [playing])
 
   // Keyboard navigation.
   useEffect(() => {
@@ -196,6 +221,11 @@ export function ClassroomPlayer({
             )}
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
+            {hasAudio && (
+              <Button variant="ghost" size="sm" onClick={() => setMuted((m) => !m)} aria-label={muted ? t('learn.player.unmute') : t('learn.player.mute')}>
+                {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={prev} disabled={sceneIdx === 0 && stepIdx === 0} aria-label={t('learn.player.previous')}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -208,6 +238,8 @@ export function ClassroomPlayer({
           </div>
         </div>
       </div>
+
+      <audio ref={audioRef} preload="auto" className="hidden" />
 
       {/* Scene strip */}
       <div className="flex gap-1.5 overflow-x-auto flex-shrink-0 pb-0.5">

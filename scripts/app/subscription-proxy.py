@@ -7,6 +7,8 @@ Lets OpenMAIC — which only speaks API keys — use *subscription* models:
   * ``POST /v1/chat/completions``  OpenAI-compatible  -> ChatGPT/Codex OAuth (Hermes `openai-codex`)
   * ``POST /v1/messages``          Anthropic Messages -> Claude Code / Hermes OAuth (Bearer + CC betas)
   * ``GET  /v1/models``            lists the models below so OpenMAIC's probe works
+  * ``POST /v1/audio/speech``      OpenAI-compatible TTS backed by Microsoft Edge neural voices
+                                    (edge-tts, free, no key) — the Learn teacher's voice
 
 Both credential paths reuse Hermes' own credential layer (``~/.hermes/hermes-agent``), so
 tokens refresh exactly as they do for Hermes itself; nothing is stored by this proxy.
@@ -43,7 +45,7 @@ CODEX_MODELS = [m for m in os.environ.get("CODEX_MODELS", "gpt-5.5,gpt-5.6,gpt-6
 ANTHROPIC_MODELS = [
     m
     for m in os.environ.get(
-        "ANTHROPIC_SUB_MODELS", "claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
+        "ANTHROPIC_SUB_MODELS", "claude-haiku-4-5-20251001,claude-sonnet-5"
     ).split(",")
     if m
 ]
@@ -300,6 +302,60 @@ def chat_with_failover(data: Dict[str, Any]) -> Tuple[Dict[str, Any], str, List[
     raise UpstreamError(502, "all providers failed: " + " | ".join(errors))
 
 
+
+# ---------------------------------------------------------------------------------------------
+# TTS — OpenAI /v1/audio/speech shape, backed by edge-tts (free Microsoft neural voices)
+# ---------------------------------------------------------------------------------------------
+# OpenAI voice names map to Edge voices so OpenMAIC's stock "openai-tts" provider works unchanged.
+EDGE_VOICES = {
+    "alloy": "en-US-AndrewMultilingualNeural",
+    "echo": "en-US-BrianMultilingualNeural",
+    "fable": "en-GB-RyanNeural",
+    "onyx": "en-US-ChristopherNeural",
+    "nova": "en-US-AvaMultilingualNeural",
+    "shimmer": "en-US-EmmaMultilingualNeural",
+    "coral": "en-US-AriaNeural",
+    "sage": "en-US-JennyNeural",
+    "ash": "en-US-GuyNeural",
+    "ballad": "en-GB-SoniaNeural",
+    "verse": "en-US-SteffanNeural",
+}
+DEFAULT_EDGE_VOICE = os.environ.get("EDGE_TTS_VOICE", "en-US-AndrewMultilingualNeural")
+
+
+def edge_voice_for(voice: Optional[str]) -> str:
+    if not voice:
+        return DEFAULT_EDGE_VOICE
+    if voice in EDGE_VOICES:
+        return EDGE_VOICES[voice]
+    return voice  # already an Edge ShortName like "es-ES-AlvaroNeural"
+
+
+def edge_rate(speed: Any) -> str:
+    try:
+        pct = int(round((float(speed) - 1.0) * 100))
+    except (TypeError, ValueError):
+        pct = 0
+    pct = max(-50, min(100, pct))
+    return f"{pct:+d}%"
+
+
+def synthesize_edge(text: str, voice: str, rate: str) -> bytes:
+    """Return MP3 bytes for ``text``. Runs the async edge-tts client on a private loop."""
+    import asyncio
+
+    import edge_tts
+
+    async def run() -> bytes:
+        chunks: List[bytes] = []
+        communicate = edge_tts.Communicate(text, voice, rate=rate)
+        async for chunk in communicate.stream():
+            if chunk.get("type") == "audio" and chunk.get("data"):
+                chunks.append(chunk["data"])
+        return b"".join(chunks)
+
+    return asyncio.run(run())
+
 # ---------------------------------------------------------------------------------------------
 # HTTP server
 # ---------------------------------------------------------------------------------------------
@@ -348,7 +404,9 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0].rstrip("/")
         if path in ("", "/health"):
             self._json(200, {"ok": True, "proxy": "subscription", "codex_models": CODEX_MODELS,
-                             "anthropic_models": ANTHROPIC_MODELS, "fallback_chain": FALLBACK_CHAIN})
+                             "anthropic_models": ANTHROPIC_MODELS, "fallback_chain": FALLBACK_CHAIN,
+                             "tts": {"engine": "edge-tts", "default_voice": DEFAULT_EDGE_VOICE,
+                                     "voices": sorted(EDGE_VOICES)}})
         elif path.endswith("/models"):
             now = int(time.time())
             self._json(200, {"object": "list", "data": [
@@ -366,7 +424,9 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:  # noqa: BLE001
             self._error(400, f"invalid JSON: {e}")
             return
-        if path.endswith("/chat/completions"):
+        if path.endswith("/audio/speech"):
+            self._speech(data)
+        elif path.endswith("/chat/completions"):
             self._chat(data)
         elif path.endswith("/messages"):
             self._messages(data)
@@ -387,6 +447,28 @@ class Handler(BaseHTTPRequestHandler):
             self._sse(_chat_to_sse(result), extra)
         else:
             self._json(200, result, extra)
+
+    def _speech(self, data: Dict[str, Any]):
+        text = str(data.get("input") or "").strip()
+        if not text:
+            self._error(400, "input is required")
+            return
+        voice = edge_voice_for(data.get("voice"))
+        rate = edge_rate(data.get("speed", 1.0))
+        try:
+            audio = synthesize_edge(text[:5000], voice, rate)
+        except Exception as e:  # noqa: BLE001
+            self._error(502, f"edge-tts failed: {e}")
+            return
+        if not audio:
+            self._error(502, "edge-tts returned no audio")
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "audio/mpeg")
+        self.send_header("Content-Length", str(len(audio)))
+        self.send_header("x-proxy-served-by", f"edge-tts:{voice}")
+        self.end_headers()
+        self.wfile.write(audio)
 
     def _messages(self, data: Dict[str, Any]):
         """Native Anthropic passthrough (streaming preserved), with model failover inside Anthropic."""

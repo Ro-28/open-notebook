@@ -1000,6 +1000,8 @@ export const deDE = {
   },
   learn: {
     player: {
+      mute: "Erzählung stumm",
+      unmute: "Erzählung an",
       modeNative: "Player",
       modeFull: "Volles Klassenzimmer",
       loadFailed: "Inhalt des Klassenzimmers konnte nicht geladen werden.",
@@ -1034,7 +1036,7 @@ export const deDE = {
     includeSources: "Quelleninhalte",
     includeInsights: "Quellen-Insights",
     includeNotes: "Notizen",
-    enableTts: "Lehrerstimme generieren (TTS)",
+    enableTts: "Lehrerstimme (kostenlos, Microsoft-Neural-Stimmen)",
     generate: "Klassenzimmer erzeugen",
     classrooms: "Klassenzimmer",
     empty: "Noch keine Klassenzimmer. Erzeuge eines aus den Materialien dieses Notizbuchs.",

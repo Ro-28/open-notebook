@@ -997,6 +997,8 @@ export const itIT = {
   },
   learn: {
     player: {
+      mute: "Disattiva audio",
+      unmute: "Attiva audio",
       modeNative: "Player",
       modeFull: "Aula completa",
       loadFailed: "Impossibile caricare il contenuto dell'aula.",
@@ -1031,7 +1033,7 @@ export const itIT = {
     includeSources: "Contenuto delle fonti",
     includeInsights: "Insight delle fonti",
     includeNotes: "Note",
-    enableTts: "Genera la voce dell'insegnante (TTS)",
+    enableTts: "Voce dell'insegnante (gratis, voci neurali Microsoft)",
     generate: "Genera aula",
     classrooms: "Aule",
     empty: "Nessuna aula ancora. Generane una dai materiali di questo quaderno.",

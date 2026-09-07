@@ -33,7 +33,7 @@ echo "claude: $CLAUDE  codex: $CODEX  ollama: $OLLAMA"
 for c in $CLAUDE $CODEX $OLLAMA; do curl -s -X POST "$API/credentials/$c/test" | head -c 160; echo; done
 
 echo "== register"
-register "$CLAUDE" anthropic_compatible language claude-haiku-4-5-20251001 claude-sonnet-5 claude-fable-5-1
+register "$CLAUDE" anthropic_compatible language claude-haiku-4-5-20251001 claude-sonnet-5
 register "$CODEX" openai_compatible language gpt-5.5 gpt-5.6 gpt-6-astra
 register "$OLLAMA" ollama embedding nomic-embed-text
 

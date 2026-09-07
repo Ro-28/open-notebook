@@ -997,6 +997,8 @@ export const jaJP = {
   },
   learn: {
     player: {
+      mute: "ナレーションをミュート",
+      unmute: "ナレーションを再生",
       modeNative: "プレーヤー",
       modeFull: "フル教室",
       loadFailed: "教室のコンテンツを読み込めませんでした。",
@@ -1031,7 +1033,7 @@ export const jaJP = {
     includeSources: "ソースの内容",
     includeInsights: "ソースのインサイト",
     includeNotes: "ノート",
-    enableTts: "教師の音声を生成（TTS）",
+    enableTts: "教師の音声（無料、Microsoft ニューラル音声）",
     generate: "教室を生成",
     classrooms: "教室",
     empty: "まだ教室がありません。このノートブックの資料から生成してください。",
