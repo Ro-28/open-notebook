@@ -66,7 +66,7 @@ LOG_LEVEL=DEBUG
 
 After starting the API and frontend, configure your AI provider via the Settings UI:
 
-1. Open **http://localhost:3000** → **Manage** → **Models**
+1. Open **http://localhost:3001** → **Manage** → **Models**
 2. Click **Add Credential** → Select your provider
 3. Enter your API key (get from provider dashboard)
 4. Click **Save**, then **Test Connection**
@@ -174,22 +174,22 @@ open http://localhost:5055/docs
 If you want to work on the frontend, start Next.js in another terminal:
 
 ```bash
-# Terminal 3: Start Next.js frontend (port 3000)
+# Terminal 3: Start Next.js frontend (this fork: port 3001; 3000 is reserved for the Hermes WhatsApp bridge)
 cd frontend
 npm install  # First time only
-npm run dev
+PORT=3001 npm run dev
 ```
 
 You should see:
 ```
 > next dev
   ▲ Next.js 16.x
-  - Local:        http://localhost:3000
+  - Local:        http://localhost:3001
 ```
 
 ### Access the Frontend
 
-Open your browser to: http://localhost:3000
+Open your browser to: http://localhost:3001
 
 ## Verification Checklist
 
@@ -199,7 +199,7 @@ After setup, verify everything is working:
 - [ ] **API**: `curl http://localhost:5055/health` returns `{"status": "ok"}`
 - [ ] **API Docs**: `open http://localhost:5055/docs` works
 - [ ] **Database**: API logs show migrations completing
-- [ ] **Frontend** (optional): `http://localhost:3000` loads
+- [ ] **Frontend** (optional): `http://localhost:3001` loads
 
 ## Development Workflows: When to Use What?
 
@@ -217,7 +217,7 @@ Local services give hot reload, direct log access and easy debugging; Docker Com
 ### Quick Start All Services
 
 ```bash
-make start-all    # SurrealDB + API + worker + frontend
+PORT=3001 make start-all    # SurrealDB + API + worker + frontend (UI on 3001)
 make status       # see what's running
 make stop-all     # stop everything
 ```
@@ -241,8 +241,10 @@ make worker-start
 
 **Terminal 4 - Frontend:**
 ```bash
-cd frontend && npm run dev
+cd frontend && PORT=3001 npm run dev
 ```
+
+**Packaged macOS app:** `scripts/app/open-notebook.sh start|status|stop` (UI on 3001, stops only verified service owners).
 
 ### Performance Tips
 
@@ -377,7 +379,7 @@ git push origin feature/my-feature -f
 
 ### "Address already in use"
 
-**Problem**: Port 5055 or 3000 is already in use
+**Problem**: Port 5055 or 3001 is already in use (on this machine, 3000 belongs to the Hermes WhatsApp bridge — do not kill it)
 
 **Solutions**:
 ```bash

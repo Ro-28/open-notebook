@@ -4,7 +4,7 @@ Normative rules for working on the Next.js frontend. Architecture and flow walkt
 
 ## Commands (run inside `frontend/`)
 
-- Dev server: `npm run dev` (port 3000; API must be up at 5055 first)
+- Dev server: `PORT=3001 npm run dev` (this fork's local UI port; API must be up at 5055 first). Upstream/Docker defaults remain unchanged.
 - Lint: `npm run lint` (`eslint src/`)
 - Tests: `npm run test` (`vitest run`) · coverage: `npm run test:coverage`
 - Build: `npm run build`

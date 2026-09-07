@@ -43,15 +43,15 @@ make database
 make api
 # or: uv run --env-file .env uvicorn api.main:app --host 0.0.0.0 --port 5055
 
-# Terminal 3: Start Frontend (UI on port 3000)
-cd frontend && npm run dev
+# Terminal 3: Start Frontend (this fork uses UI port 3001; 3000 is reserved for the Hermes WhatsApp bridge on this machine)
+cd frontend && PORT=3001 npm run dev
 ```
 
 ## 4. Verify Everything Works (instant)
 
 - **API Health**: http://localhost:5055/health → should return `{"status": "ok"}`
 - **API Docs**: http://localhost:5055/docs → interactive API documentation
-- **Frontend**: http://localhost:3000 → Open Notebook UI
+- **Frontend**: http://localhost:3001 → Open Notebook UI
 
 **All three show up?** ✅ You're ready to develop!
 
@@ -116,8 +116,8 @@ make ruff
 # Type checking
 make lint
 
-# Run the full stack
-make start-all
+# Run the full stack (UI on 3001; the Makefile banner still prints 3000)
+PORT=3001 make start-all
 
 # View API documentation
 open http://localhost:5055/docs

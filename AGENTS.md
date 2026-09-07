@@ -6,16 +6,16 @@ This file holds the project-wide rules every coding session needs. Component rul
 
 ## Stack, ports, startup order
 
-Three tiers: Next.js frontend (3000) → FastAPI (5055) → SurrealDB (8000).
+Three tiers: Next.js frontend (3001 for this fork's local development) → FastAPI (5055) → SurrealDB (8000). Upstream/Docker port defaults remain unchanged.
 
 Start in this order — each tier depends on the one below:
 
 1. `make database` — SurrealDB (API fails without it)
 2. `make api` — FastAPI; **schema migrations run automatically on startup** (check logs)
 3. `make worker-start` — surreal-commands worker. **Required**: podcasts, embeddings and source processing are async jobs that silently queue forever without it
-4. `make frontend` — UI (depends on the API for all data)
+4. `PORT=3001 make frontend` — UI (depends on the API for all data)
 
-Or all at once: `make start-all` (status: `make status`, stop: `make stop-all`).
+Or all at once: `PORT=3001 make start-all` (its legacy banner still says 3000; open http://localhost:3001). For the packaged macOS app, use `scripts/app/open-notebook.sh start|status|stop`; it defaults to UI port 3001 and stops only verified service owners.
 
 ## Commands
 
