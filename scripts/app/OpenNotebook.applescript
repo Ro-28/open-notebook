@@ -5,7 +5,7 @@
 -- Clicking the Dock icon again re-opens the UI in the browser.
 
 property projectRoot : "/Users/roberto/Projects/open-notebook"
-property uiURL : "http://localhost:3000"
+property uiURL : "http://localhost:3001"
 property stopping : false
 
 on ctl(cmd)

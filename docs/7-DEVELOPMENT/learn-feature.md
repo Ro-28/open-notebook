@@ -8,7 +8,7 @@ service next to the Open Notebook API. This is a personal-fork feature.
 ## Architecture
 
 ```
-Open Notebook UI (3000)  ──►  Open Notebook API (5055)  ──►  OpenMAIC (3100)
+Open Notebook UI (3001)  ──►  Open Notebook API (5055)  ──►  OpenMAIC (3100)
    LearnDialog.tsx              api/routers/learn.py           vendor/openmaic (git submodule)
    iframe <classroom>           api/learning_service.py        POST /api/generate-classroom
                                 learning_session (SurrealDB)   GET  /api/generate-classroom/{jobId}
@@ -46,7 +46,7 @@ OPENAI_API_KEY=...            # any OpenAI-compatible endpoint
 OPENAI_BASE_URL=https://ollama.com/v1
 OPENAI_MODELS=gpt-oss:120b,...
 DEFAULT_MODEL=openai:gpt-oss:120b
-ALLOWED_FRAME_ANCESTORS=http://localhost:3000   # baked at build time
+ALLOWED_FRAME_ANCESTORS=http://localhost:3001   # baked at build time
 ```
 
 `ALLOWED_FRAME_ANCESTORS` is read by OpenMAIC's `next.config.ts` **at build

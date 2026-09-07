@@ -1,5 +1,11 @@
+/// <reference types="vitest/jsdom" />
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
+
+// Node's native Web Storage can shadow jsdom (and be unavailable without
+// --localstorage-file). Stores must capture this test window's real Storage.
+vi.stubGlobal('localStorage', jsdom.window.localStorage)
+vi.stubGlobal('sessionStorage', jsdom.window.sessionStorage)
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({

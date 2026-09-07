@@ -1,8 +1,10 @@
+import asyncio
 import os
+import random
 import re
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, TypeVar, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, TypeVar, Union
 
 from loguru import logger
 from surrealdb import AsyncSurreal, RecordID  # type: ignore
@@ -99,13 +101,26 @@ async def db_connection():
 
 
 async def repo_query(
-    query_str: str, vars: Optional[Dict[str, Any]] = None
+    query_str: str,
+    vars: Optional[Dict[str, Any]] = None,
+    *,
+    retry_conflicts: bool = False,
 ) -> List[Dict[str, Any]]:
-    """Execute a SurrealQL query and return the results"""
+    """Execute a query; opt into retries only for a single atomic statement.
+
+    Arbitrary queries may have already committed earlier statements when a
+    later one fails, so they must not be replayed by default.
+    """
 
     async with db_connection() as connection:
         try:
-            result = parse_record_ids(await connection.query(query_str, vars))
+            if retry_conflicts:
+                result = await _retry_transaction_conflicts(
+                    lambda: connection.query(query_str, vars)
+                )
+            else:
+                result = await connection.query(query_str, vars)
+            result = parse_record_ids(result)
             if isinstance(result, str):
                 raise RuntimeError(result)
             return result
@@ -118,6 +133,33 @@ async def repo_query(
             raise
 
 
+async def _retry_transaction_conflicts(operation: Callable[[], Awaitable[Any]]) -> Any:
+    """Retry only an atomic operation explicitly rejected before commit.
+
+    Never wrap a workflow, multiple auto-committed statements, or connection
+    cleanup: those can fail after an earlier write has already committed.
+    Transport errors have an unknown commit outcome and must not be replayed.
+    """
+    for attempt in range(5):
+        try:
+            result = await operation()
+            if isinstance(result, str):
+                raise RuntimeError(result)
+            return result
+        except RuntimeError as exc:
+            if (
+                "failed to commit transaction due to a read or write conflict"
+                not in str(exc).lower()
+                or attempt == 4
+            ):
+                raise
+            delay = random.uniform(0.025, min(0.05 * 2**attempt, 1.0))
+            logger.debug(
+                "Retrying aborted database transaction (attempt {}/5)", attempt + 2
+            )
+            await asyncio.sleep(delay)
+
+
 async def repo_create(table: str, data: Dict[str, Any]) -> Dict[str, Any]:
     """Create a new record in the specified table"""
     # Remove 'id' attribute if it exists in data
@@ -126,11 +168,10 @@ async def repo_create(table: str, data: Dict[str, Any]) -> Dict[str, Any]:
     data["updated"] = datetime.now(timezone.utc)
     try:
         async with db_connection() as connection:
-            result = parse_record_ids(await connection.insert(table, data))
-            # SurrealDB may return a string error message instead of the expected record
-            if isinstance(result, str):
-                raise RuntimeError(result)
-            return result
+            result = await _retry_transaction_conflicts(
+                lambda: connection.insert(table, data)
+            )
+            return parse_record_ids(result)
     except RuntimeError as e:
         logger.error(str(e))
         raise
@@ -162,6 +203,7 @@ async def repo_relate(
             "target": ensure_record_id(target),
             "data": data,
         },
+        retry_conflicts=True,
     )
 
 
@@ -175,7 +217,9 @@ async def repo_upsert(
     _ensure_safe_identifier(table, "table")
     target: Union[RecordID, Table] = ensure_record_id(id) if id else Table(table)
     query = "UPSERT $target MERGE $data;"
-    return await repo_query(query, {"target": target, "data": data})
+    return await repo_query(
+        query, {"target": target, "data": data}, retry_conflicts=True
+    )
 
 
 async def repo_update(
@@ -197,7 +241,9 @@ async def repo_update(
         data["updated"] = datetime.now(timezone.utc)
         query = "UPDATE $target MERGE $data;"
         # logger.debug(f"Update query: {query}")
-        result = await repo_query(query, {"target": record_id, "data": data})
+        result = await repo_query(
+            query, {"target": record_id, "data": data}, retry_conflicts=True
+        )
         # if isinstance(result, list):
         #     return [_return_data(item) for item in result]
         return parse_record_ids(result)
@@ -222,11 +268,10 @@ async def repo_insert(
     """Create a new record in the specified table"""
     try:
         async with db_connection() as connection:
-            result = parse_record_ids(await connection.insert(table, data))
-            # SurrealDB may return a string error message instead of the expected records
-            if isinstance(result, str):
-                raise RuntimeError(result)
-            return result
+            result = await _retry_transaction_conflicts(
+                lambda: connection.insert(table, data)
+            )
+            return parse_record_ids(result)
     except RuntimeError as e:
         if ignore_duplicates and "already contains" in str(e):
             return []
