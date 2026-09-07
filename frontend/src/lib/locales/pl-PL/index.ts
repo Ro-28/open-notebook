@@ -996,6 +996,10 @@ export const plPL = {
     viewDocs: "Zobacz dokumentację",
   },
   learn: {
+    learnThis: "Naucz się tego",
+    learnThisDesc: "Wygeneruj interaktywną klasę odpowiadającą na to pytanie z wybranych notatników",
+    fromQuestionStartedDesc: "Tworzenie klasy z Twojego pytania. Śledź postęp na stronie Ucz się.",
+    fromQuestionScope: "Z pytania · {{scope}}",
     dueForReview: "{{count}} klas(y) do powtórki",
     inProgress: "W toku · {{n}} scen obejrzanych",
     quizScore: "Quiz {{pct}}%",

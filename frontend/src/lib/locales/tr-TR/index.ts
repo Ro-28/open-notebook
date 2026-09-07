@@ -996,6 +996,10 @@ export const trTR = {
     viewDocs: "Belgeleri Görüntüle",
   },
   learn: {
+    learnThis: "Bunu öğren",
+    learnThisDesc: "Seçili not defterlerinden bu soruyu yanıtlayan etkileşimli bir sınıf oluştur",
+    fromQuestionStartedDesc: "Sorunuzdan bir sınıf oluşturuluyor. Öğren sayfasından takip edin.",
+    fromQuestionScope: "Sorudan · {{scope}}",
     dueForReview: "Tekrar zamanı gelen sınıf: {{count}}",
     inProgress: "Devam ediyor · {{n}} sahne görüldü",
     quizScore: "Sınav %{{pct}}",

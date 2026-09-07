@@ -996,6 +996,10 @@ export const jaJP = {
     viewDocs: "ドキュメントを見る",
   },
   learn: {
+    learnThis: "これを学ぶ",
+    learnThisDesc: "選択したノートブックからこの質問に答えるインタラクティブな教室を生成します",
+    fromQuestionStartedDesc: "質問から教室を作成しています。「学ぶ」ページで確認できます。",
+    fromQuestionScope: "質問から · {{scope}}",
     dueForReview: "復習予定の教室：{{count}}",
     inProgress: "進行中 · {{n}} シーン閲覧",
     quizScore: "クイズ {{pct}}%",

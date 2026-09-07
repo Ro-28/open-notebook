@@ -996,6 +996,10 @@ export const zhTW = {
     viewDocs: "查看文件",
   },
   learn: {
+    learnThis: "學習這個",
+    learnThisDesc: "根據所選筆記本產生一個回答此問題的互動課堂",
+    fromQuestionStartedDesc: "正在根據你的問題建立課堂。可在「學習」頁面查看進度。",
+    fromQuestionScope: "來自問題 · {{scope}}",
     dueForReview: "{{count}} 個課堂待複習",
     inProgress: "進行中 · 已看 {{n}} 個場景",
     quizScore: "測驗 {{pct}}%",

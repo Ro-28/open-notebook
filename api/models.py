@@ -846,6 +846,8 @@ class LearningSessionResponse(BaseModel):
     id: str
     notebook_id: str
     notebook_name: Optional[str] = None
+    question: Optional[str] = None
+    scope_notebooks: Optional[List[str]] = None
     title: str
     requirement: str
     status: str
@@ -878,6 +880,14 @@ class LearningProgressUpdate(BaseModel):
         description="Quiz results keyed by scene id: {answers: {qid: [values]}, correct: n, total: n, wrong: [qid]}",
     )
     completed: Optional[bool] = Field(None, description="Mark the classroom completed (or reopen with false)")
+
+
+class LearningFromQuestionCreate(NotebookScopeMixin):
+    """'Learn' from Ask & Search: a classroom that answers a question across the selected notebooks."""
+
+    question: str = Field(..., min_length=3)
+    title: Optional[str] = None
+    enable_tts: bool = True
 
 
 class LearningStatusResponse(BaseModel):

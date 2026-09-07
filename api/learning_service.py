@@ -45,14 +45,19 @@ def scope_tag(notebook_id: str) -> str:
     return f"[nb:{notebook_id}]"
 
 
+def split_scope_tags(text: str) -> Tuple[str, List[str]]:
+    """Return (text without tags, notebook ids) — tags may have been rewritten away."""
+    ids = []
+    for m in SCOPE_TAG.finditer(text or ""):
+        nb = m.group(1)
+        ids.append(nb if nb.startswith("notebook:") else f"notebook:{nb}")
+    return (SCOPE_TAG.sub("", text).strip() if ids else text), ids
+
+
 def split_scope_tag(text: str) -> Tuple[str, Optional[str]]:
-    """Return (text without tag, notebook id) — the tag may have been rewritten away."""
-    m = SCOPE_TAG.search(text or "")
-    if not m:
-        return text, None
-    nb = m.group(1)
-    nb = nb if nb.startswith("notebook:") else f"notebook:{nb}"
-    return SCOPE_TAG.sub("", text).strip(), nb
+    """Single-notebook convenience over split_scope_tags."""
+    clean, ids = split_scope_tags(text)
+    return clean, (ids[0] if ids else None)
 
 
 def openmaic_url() -> str:
@@ -188,22 +193,97 @@ async def create_learning_session(
     )
     await session.save()
 
-    payload = {
-        "requirement": requirement,
-        "pdfContent": {"text": bundle["text"], "images": []},
+    return await _submit_classroom(
+        session,
+        material_text=bundle["text"],
+        scope=scope_tag(notebook_id) if live_retrieval else None,
+        enable_tts=enable_tts,
+        enable_image_generation=enable_image_generation,
+        enable_web_search=enable_web_search,
+    )
+
+
+async def create_learning_session_from_question(
+    question: str,
+    notebook_ids: Optional[List[str]] = None,
+    title: Optional[str] = None,
+    enable_tts: bool = True,
+    limit: int = 12,
+) -> LearningSession:
+    """Build a classroom that answers a question, from the best-matching passages across the
+    selected notebooks (or the whole knowledge base) — the "Learn" action on Ask & Search."""
+    from open_notebook.domain.notebook import text_search, vector_search
+
+    question = (question or "").strip()
+    if not question:
+        raise InvalidInputError("A question is required")
+    scope = [n for n in (notebook_ids or []) if n] or None
+    try:
+        rows = await vector_search(question, limit, notebook_ids=scope)
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"Learn-from-question: vector search failed ({e}); using text search")
+        rows = []
+    if not rows:
+        rows = await text_search(question, limit, notebook_ids=scope)
+    if not rows:
+        raise InvalidInputError("Nothing in the selected notebooks matches that question")
+
+    parts = [f"# Question\n\n{question}\n\n# Relevant material"]
+    for row in rows:
+        matches = row.get("matches") or []
+        body = "\n".join(m for m in matches if isinstance(m, str)) if isinstance(matches, list) else str(matches)
+        parts.append(f"\n\n## {row.get('title') or 'Untitled'}\n{_truncate(body, PER_SOURCE_CHARS)}")
+    material = _truncate("\n".join(parts), LIVE_RETRIEVAL_MATERIAL_CHARS)
+
+    names = await notebook_names(scope or [])
+    scope_label = ", ".join(names.values()) if names else "the knowledge base"
+    requirement = (
+        f'Create a focused lesson that answers the question: "{question}". Teach the underlying '
+        f"concepts needed to understand the answer, base every slide strictly on the provided "
+        f"materials, include a short quiz, and finish with a concise summary of the answer."
+    )
+    session = LearningSession(
+        notebook=scope[0] if scope and len(scope) == 1 else None,
+        scope_notebooks=list(scope) if scope else None,
+        question=question,
+        title=title or f"Learn: {question[:80]}",
+        requirement=requirement,
+        status="pending",
+        options={"from_question": True, "enable_tts": enable_tts, "live_retrieval": True, "scope": scope_label},
+        material_stats={"sources": len(rows), "insights": 0, "notes": 0, "chars": len(material), "truncated": False},
+    )
+    await session.save()
+    # live retrieval scoped to the same notebooks (one tag per notebook; unscoped = whole KB)
+    tags = " ".join(scope_tag(n) for n in scope) if scope else ""
+    return await _submit_classroom(session, material_text=material, scope=tags, enable_tts=enable_tts)
+
+
+async def _submit_classroom(
+    session: LearningSession,
+    *,
+    material_text: str,
+    scope: Optional[str],
+    enable_tts: bool = False,
+    enable_image_generation: bool = False,
+    enable_web_search: bool = False,
+) -> LearningSession:
+    """Submit the generation job to OpenMAIC and record the job on the session."""
+    payload: Dict[str, Any] = {
+        "requirement": session.requirement,
+        "pdfContent": {"text": material_text, "images": []},
         "enableTTS": enable_tts,
         "enableImageGeneration": enable_image_generation,
         "enableVideoGeneration": False,
         "enableWebSearch": enable_web_search,
     }
-    if live_retrieval:
+    if scope is not None:
         # OpenMAIC's "web search" is pointed at Open Notebook: its keyless SearXNG provider is a
         # plain JSON GET, which /api/learn/searxng/search emulates (SEARXNG_BASE_URL in the sidecar
-        # .env). The notebook scope travels inside the query as a `[nb:<id>]` tag that the
-        # requirement carries; the endpoint strips it and scopes the search. OpenMAIC is unmodified.
+        # .env). The notebook scope travels inside the query as `[nb:<id>]` tags that the
+        # requirement carries; the endpoint strips them and scopes the search. OpenMAIC is unmodified.
         payload["enableWebSearch"] = True
         payload["webSearchProviderId"] = "searxng"
-        payload["requirement"] = f"{requirement} {scope_tag(notebook_id)}"
+        payload["requirement"] = f"{session.requirement} {scope}".strip()
     try:
         async with httpx.AsyncClient(timeout=60) as client:
             r = await client.post(
@@ -323,16 +403,19 @@ async def delete_learning_session(session_id: str) -> None:
     await session.delete()
 
 
-async def _active_learning_notebook() -> Optional[str]:
-    """Notebook of the most recent running classroom job — OpenMAIC's query rewrite can drop
-    the ``[nb:]`` scope tag, and only one classroom is generated at a time in practice."""
+async def _active_learning_scope() -> Optional[List[str]]:
+    """Notebook scope of the most recent running classroom job — OpenMAIC's query rewrite can
+    drop the ``[nb:]`` tags, and only one classroom is generated at a time in practice.
+    ``None`` means the job spans the whole knowledge base (or nothing is running)."""
     try:
         rows = await LearningSession.all_recent(limit=5)
     except Exception:  # noqa: BLE001
         return None
     for s in rows:
         if s.status in ("pending", "running"):
-            return s.notebook_id
+            if s.scope_notebooks:
+                return [str(n) for n in s.scope_notebooks]
+            return [s.notebook_id] if s.notebook_id else None
     return None
 
 
@@ -346,9 +429,13 @@ async def notebook_search_as_searxng(
     """
     from open_notebook.domain.notebook import text_search, vector_search
 
-    query, tagged = split_scope_tag((query or "").strip())
-    notebook_id = notebook_id or tagged or await _active_learning_notebook()
-    scope = [notebook_id] if notebook_id else None
+    query, tagged = split_scope_tags((query or "").strip())
+    if notebook_id:
+        scope: Optional[List[str]] = [notebook_id]
+    elif tagged:
+        scope = tagged
+    else:
+        scope = await _active_learning_scope()
     if not query:
         return {"query": query, "number_of_results": 0, "results": []}
     try:

@@ -117,7 +117,7 @@ async def test_searxng_shape_scopes_and_falls_back_to_text():
 
     with patch("open_notebook.domain.notebook.vector_search", vec), patch(
         "open_notebook.domain.notebook.text_search", txt
-    ), patch.object(learning_service, "_active_learning_notebook", no_active):
+    ), patch.object(learning_service, "_active_learning_scope", no_active):
         out = await learning_service.notebook_search_as_searxng("ceres size [nb:notebook:n1]", 5)
     assert calls == [("vector", "ceres size", ["notebook:n1"]), ("text", "ceres size", ["notebook:n1"])]
     assert out["number_of_results"] == 1

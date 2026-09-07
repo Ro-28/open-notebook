@@ -995,6 +995,10 @@ export const enUS = {
     viewDocs: "View docs",
   },
   learn: {
+    learnThis: "Learn this",
+    learnThisDesc: "Generate an interactive classroom that answers this question from the selected notebooks",
+    fromQuestionStartedDesc: "Building a classroom from your question. Track it on the Learn page.",
+    fromQuestionScope: "From a question · {{scope}}",
     dueForReview: "{{count}} classroom(s) due for review",
     inProgress: "In progress · {{n}} scenes seen",
     quizScore: "Quiz {{pct}}%",

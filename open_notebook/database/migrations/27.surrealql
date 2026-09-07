@@ -1,0 +1,6 @@
+-- Migration 27: classrooms from a question (Learn from Ask/Search)
+-- A learning_session may span the whole knowledge base: notebook becomes optional and the
+-- originating question / scope are recorded.
+DEFINE FIELD OVERWRITE notebook ON TABLE learning_session TYPE option<record<notebook>>;
+DEFINE FIELD IF NOT EXISTS question ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS scope_notebooks ON TABLE learning_session TYPE option<array<record<notebook>>>;

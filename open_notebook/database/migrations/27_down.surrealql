@@ -1,0 +1,4 @@
+-- Rollback Migration 27
+REMOVE FIELD IF EXISTS question ON TABLE learning_session;
+REMOVE FIELD IF EXISTS scope_notebooks ON TABLE learning_session;
+DEFINE FIELD OVERWRITE notebook ON TABLE learning_session TYPE record<notebook>;

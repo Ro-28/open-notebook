@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query
 
 from api import learning_service
 from api.models import (
+    LearningFromQuestionCreate,
     LearningProgressUpdate,
     LearningSessionCreate,
     LearningSessionResponse,
@@ -21,6 +22,8 @@ def _to_response(s: LearningSession, notebook_name: Optional[str] = None) -> Lea
         id=str(s.id),
         notebook_id=s.notebook_id,
         notebook_name=notebook_name,
+        question=s.question,
+        scope_notebooks=[str(n) for n in s.scope_notebooks] if s.scope_notebooks else None,
         title=s.title,
         requirement=s.requirement,
         status=s.status,
@@ -55,6 +58,19 @@ async def list_all_sessions(refresh: bool = Query(True, description="Poll runnin
     sessions = await learning_service.list_all_learning_sessions(refresh=refresh)
     names = await learning_service.notebook_names({s.notebook_id for s in sessions})
     return [_to_response(s, names.get(s.notebook_id)) for s in sessions]
+
+
+@router.post("/learn/from-question", response_model=LearningSessionResponse, status_code=202)
+async def create_from_question(body: LearningFromQuestionCreate):
+    """'Learn' on Ask & Search: a classroom that answers a question from the selected notebooks
+    (or the whole knowledge base when no scope is given)."""
+    from api.routers.search import resolve_notebook_scope
+
+    notebook_ids = await resolve_notebook_scope(body.scope_notebook_ids)
+    session = await learning_service.create_learning_session_from_question(
+        body.question, notebook_ids=notebook_ids, title=body.title, enable_tts=body.enable_tts
+    )
+    return _to_response(session)
 
 
 @router.get(

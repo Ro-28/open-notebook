@@ -999,6 +999,10 @@ export const deDE = {
     viewDocs: "Dokumentation anzeigen",
   },
   learn: {
+    learnThis: "Das lernen",
+    learnThisDesc: "Ein interaktives Klassenzimmer erzeugen, das diese Frage aus den gewählten Notizbüchern beantwortet",
+    fromQuestionStartedDesc: "Klassenzimmer aus deiner Frage wird erzeugt. Verfolge es auf der Lernen-Seite.",
+    fromQuestionScope: "Aus einer Frage · {{scope}}",
     dueForReview: "{{count}} Klassenzimmer zur Wiederholung fällig",
     inProgress: "In Arbeit · {{n}} Szenen gesehen",
     quizScore: "Quiz {{pct}} %",

@@ -146,11 +146,13 @@ export default function LearnPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="font-medium truncate">{s.title}</p>
-                          {s.notebook_name && (
+                          {s.notebook_name ? (
                             <Link href={`/notebooks/${s.notebook_id}`} className="text-xs text-muted-foreground hover:underline truncate block">
                               {s.notebook_name}
                             </Link>
-                          )}
+                          ) : s.question ? (
+                            <p className="text-xs text-muted-foreground truncate">{t('learn.fromQuestionScope', { scope: String(s.options?.scope ?? '') })}</p>
+                          ) : null}
                         </div>
                         <Badge variant={statusVariant(s.status)}>{t(STATUS_KEYS[s.status] ?? STATUS_KEYS.pending)}</Badge>
                       </div>

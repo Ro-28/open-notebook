@@ -996,6 +996,10 @@ export const ptBR = {
     viewDocs: "Ver documentação",
   },
   learn: {
+    learnThis: "Aprender isto",
+    learnThisDesc: "Gere uma sala de aula interativa que responda a esta pergunta a partir dos cadernos selecionados",
+    fromQuestionStartedDesc: "Criando uma sala de aula a partir da sua pergunta. Acompanhe na página Aprender.",
+    fromQuestionScope: "De uma pergunta · {{scope}}",
     dueForReview: "{{count}} sala(s) para revisar",
     inProgress: "Em andamento · {{n}} cenas vistas",
     quizScore: "Quiz {{pct}}%",

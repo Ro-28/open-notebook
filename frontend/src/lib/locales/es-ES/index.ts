@@ -997,6 +997,10 @@ export const esES = {
     viewDocs: "Ver documentación",
   },
   learn: {
+    learnThis: "Aprender esto",
+    learnThisDesc: "Genera un aula interactiva que responda esta pregunta a partir de los cuadernos seleccionados",
+    fromQuestionStartedDesc: "Creando un aula a partir de tu pregunta. Síguela en la página Aprender.",
+    fromQuestionScope: "De una pregunta · {{scope}}",
     dueForReview: "{{count}} aula(s) pendientes de repaso",
     inProgress: "En curso · {{n}} escenas vistas",
     quizScore: "Test {{pct}}%",

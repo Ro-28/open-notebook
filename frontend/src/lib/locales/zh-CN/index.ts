@@ -996,6 +996,10 @@ export const zhCN = {
     viewDocs: "查看文档",
   },
   learn: {
+    learnThis: "学习这个",
+    learnThisDesc: "根据所选笔记本生成一个回答此问题的互动课堂",
+    fromQuestionStartedDesc: "正在根据你的问题创建课堂。可在“学习”页面查看进度。",
+    fromQuestionScope: "来自问题 · {{scope}}",
     dueForReview: "{{count}} 个课堂待复习",
     inProgress: "进行中 · 已看 {{n}} 个场景",
     quizScore: "测验 {{pct}}%",

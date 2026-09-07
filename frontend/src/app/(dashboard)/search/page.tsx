@@ -14,9 +14,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Search, ChevronDown, AlertCircle, Settings, Save, MessageCircleQuestion } from 'lucide-react'
+import { Search, ChevronDown, AlertCircle, Settings, Save, MessageCircleQuestion, GraduationCap } from 'lucide-react'
 import { useSearch } from '@/lib/hooks/use-search'
 import { useAsk } from '@/lib/hooks/use-ask'
+import { useLearnFromQuestion, useLearnStatus } from '@/lib/hooks/use-learn'
 import { useModelDefaults, useModels } from '@/lib/hooks/use-models'
 import { useModalManager } from '@/lib/hooks/use-modal-manager'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
@@ -64,6 +65,8 @@ export default function SearchPage() {
   // Hooks
   const searchMutation = useSearch()
   const ask = useAsk()
+  const learnStatus = useLearnStatus()
+  const learnFromQuestion = useLearnFromQuestion()
   const { data: modelDefaults, isLoading: modelsLoading } = useModelDefaults()
   const { data: availableModels } = useModels()
   const { openModal } = useModalManager()
@@ -281,6 +284,23 @@ export default function SearchPage() {
                         >
                           <Save className="h-4 w-4 mr-2" />
                           {t('searchPage.saveToNotebooks')}
+                        </Button>
+                      )}
+
+                      {learnStatus.data?.available && (
+                        <Button
+                          variant="outline"
+                          onClick={() => learnFromQuestion.mutate({ question: askQuestion, notebook_ids: scopeNotebookIds })}
+                          disabled={learnFromQuestion.isPending || !askQuestion.trim()}
+                          className="w-full sm:w-auto sm:flex-shrink-0"
+                          title={t('learn.learnThisDesc')}
+                        >
+                          {learnFromQuestion.isPending ? (
+                            <LoadingSpinner size="sm" className="mr-2" />
+                          ) : (
+                            <GraduationCap className="h-4 w-4 mr-2" />
+                          )}
+                          {t('learn.learnThis')}
                         </Button>
                       )}
                     </div>

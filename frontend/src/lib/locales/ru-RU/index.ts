@@ -996,6 +996,10 @@ export const ruRU = {
     viewDocs: "Документация",
   },
   learn: {
+    learnThis: "Изучить это",
+    learnThisDesc: "Создать интерактивный класс, отвечающий на этот вопрос по выбранным блокнотам",
+    fromQuestionStartedDesc: "Создаём класс по вашему вопросу. Следите на странице «Учиться».",
+    fromQuestionScope: "Из вопроса · {{scope}}",
     dueForReview: "Пора повторить: {{count}}",
     inProgress: "В процессе · просмотрено сцен: {{n}}",
     quizScore: "Тест {{pct}}%",

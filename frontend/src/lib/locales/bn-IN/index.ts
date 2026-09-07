@@ -997,6 +997,10 @@ export const bnIN = {
     viewDocs: "ডকুমেন্টেশন দেখুন",
   },
   learn: {
+    learnThis: "এটি শিখুন",
+    learnThisDesc: "নির্বাচিত নোটবুক থেকে এই প্রশ্নের উত্তর দেয় এমন একটি ইন্টারঅ্যাকটিভ ক্লাসরুম তৈরি করুন",
+    fromQuestionStartedDesc: "আপনার প্রশ্ন থেকে ক্লাসরুম তৈরি হচ্ছে। শিখুন পৃষ্ঠায় দেখুন।",
+    fromQuestionScope: "প্রশ্ন থেকে · {{scope}}",
     dueForReview: "{{count}}টি ক্লাসরুম পুনরালোচনার জন্য প্রস্তুত",
     inProgress: "চলছে · {{n}}টি দৃশ্য দেখা হয়েছে",
     quizScore: "কুইজ {{pct}}%",

@@ -102,3 +102,21 @@ export function useDeleteLearningSession(notebookId: string) {
     },
   })
 }
+
+/** "Learn this" on Ask & Search: a classroom answering the question over the current scope. */
+export function useLearnFromQuestion() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: (data: { question: string; notebook_ids?: string[]; enable_tts?: boolean }) => learnApi.createFromQuestion(data),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: LEARN_KEYS.all })
+      toast({ title: t('learn.generationStarted'), description: t('learn.fromQuestionStartedDesc') })
+    },
+    onError: (error: unknown) => {
+      toast({ title: t('learn.generationFailed'), description: getApiErrorKey(error, t('common.error')), variant: 'destructive' })
+    },
+  })
+}

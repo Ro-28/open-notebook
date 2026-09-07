@@ -996,6 +996,10 @@ export const frFR = {
     viewDocs: "Voir la documentation",
   },
   learn: {
+    learnThis: "Apprendre ceci",
+    learnThisDesc: "Générer une classe interactive qui répond à cette question à partir des carnets sélectionnés",
+    fromQuestionStartedDesc: "Création d'une classe à partir de votre question. Suivez-la sur la page Apprendre.",
+    fromQuestionScope: "D'une question · {{scope}}",
     dueForReview: "{{count}} classe(s) à réviser",
     inProgress: "En cours · {{n}} scènes vues",
     quizScore: "Quiz {{pct}} %",

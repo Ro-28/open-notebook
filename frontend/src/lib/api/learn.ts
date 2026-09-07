@@ -4,6 +4,8 @@ export interface LearningSession {
   id: string
   notebook_id: string
   notebook_name?: string | null
+  question?: string | null
+  scope_notebooks?: string[] | null
   title: string
   requirement: string
   status: 'pending' | 'running' | 'succeeded' | 'failed'
@@ -90,6 +92,11 @@ export const learnApi = {
 
   create: async (notebookId: string, data: LearningSessionCreate) => {
     const response = await apiClient.post<LearningSession>(`/notebooks/${notebookId}/learn`, data)
+    return response.data
+  },
+
+  createFromQuestion: async (data: { question: string; notebook_ids?: string[]; title?: string; enable_tts?: boolean }) => {
+    const response = await apiClient.post<LearningSession>('/learn/from-question', data)
     return response.data
   },
 

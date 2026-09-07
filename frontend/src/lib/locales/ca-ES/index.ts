@@ -996,6 +996,10 @@ export const caES = {
     viewDocs: "Visualitza la documentació",
   },
   learn: {
+    learnThis: "Aprèn això",
+    learnThisDesc: "Genera una aula interactiva que respongui aquesta pregunta a partir dels quaderns seleccionats",
+    fromQuestionStartedDesc: "S'està creant una aula a partir de la teva pregunta. Segueix-la a la pàgina Aprèn.",
+    fromQuestionScope: "D'una pregunta · {{scope}}",
     dueForReview: "{{count}} aula/es pendents de repàs",
     inProgress: "En curs · {{n}} escenes vistes",
     quizScore: "Qüestionari {{pct}}%",

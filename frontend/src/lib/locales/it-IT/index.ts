@@ -996,6 +996,10 @@ export const itIT = {
     viewDocs: "Vedi documentazione",
   },
   learn: {
+    learnThis: "Impara questo",
+    learnThisDesc: "Genera un'aula interattiva che risponda a questa domanda dai quaderni selezionati",
+    fromQuestionStartedDesc: "Creazione dell'aula dalla tua domanda. Seguila nella pagina Impara.",
+    fromQuestionScope: "Da una domanda · {{scope}}",
     dueForReview: "{{count}} aula/e da ripassare",
     inProgress: "In corso · {{n}} scene viste",
     quizScore: "Quiz {{pct}}%",
