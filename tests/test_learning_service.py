@@ -90,3 +90,36 @@ def test_openmaic_url_defaults(monkeypatch):
     monkeypatch.setenv("OPENMAIC_PUBLIC_URL", "https://learn.example.com/")
     assert learning_service.openmaic_url() == "http://openmaic:3100"
     assert learning_service.public_openmaic_url() == "https://learn.example.com"
+
+
+def test_scope_tag_roundtrip():
+    tagged = f"teach planets {learning_service.scope_tag('notebook:abc')}"
+    text, nb = learning_service.split_scope_tag(tagged)
+    assert text == "teach planets" and nb == "notebook:abc"
+    assert learning_service.split_scope_tag("no tag") == ("no tag", None)
+    assert learning_service.split_scope_tag("x [nb:abc]")[1] == "notebook:abc"
+
+
+@pytest.mark.asyncio
+async def test_searxng_shape_scopes_and_falls_back_to_text():
+    calls = []
+
+    async def vec(q, n, notebook_ids=None, **kw):
+        calls.append(("vector", q, notebook_ids))
+        return []
+
+    async def txt(q, n, notebook_ids=None, **kw):
+        calls.append(("text", q, notebook_ids))
+        return [{"id": "note:1", "title": "Ceres", "matches": ["940 km across"], "similarity": 0.9}]
+
+    async def no_active():
+        return None
+
+    with patch("open_notebook.domain.notebook.vector_search", vec), patch(
+        "open_notebook.domain.notebook.text_search", txt
+    ), patch.object(learning_service, "_active_learning_notebook", no_active):
+        out = await learning_service.notebook_search_as_searxng("ceres size [nb:notebook:n1]", 5)
+    assert calls == [("vector", "ceres size", ["notebook:n1"]), ("text", "ceres size", ["notebook:n1"])]
+    assert out["number_of_results"] == 1
+    r = out["results"][0]
+    assert r["title"] == "Ceres (note)" and r["content"] == "940 km across" and r["url"].endswith("/api/learn/ref/note:1")

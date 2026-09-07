@@ -996,6 +996,8 @@ export const jaJP = {
     viewDocs: "ドキュメントを見る",
   },
   learn: {
+    liveRetrieval: "授業中にノートブックを検索",
+    liveRetrievalDesc: "教室が必要に応じてこのノートブックから詳細を取得します。プロンプトより大きいノートブックでも動作します。",
     pageTitle: "学ぶ",
     pageDesc: "ノートブックから生成されたインタラクティブなAI教室 — スライド、AI教師、クイズ。",
     pageEmpty: "まだ教室がありません。上でノートブックを選んで最初の教室を生成してください。",

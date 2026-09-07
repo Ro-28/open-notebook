@@ -995,6 +995,8 @@ export const enUS = {
     viewDocs: "View docs",
   },
   learn: {
+    liveRetrieval: "Search the notebook while teaching",
+    liveRetrievalDesc: "The classroom looks up details from this notebook on demand — works for notebooks larger than the prompt.",
     pageTitle: "Learn",
     pageDesc: "Interactive AI classrooms generated from your notebooks — slides, an AI teacher, and quizzes.",
     pageEmpty: "No classrooms yet. Pick a notebook above and generate your first one.",

@@ -996,6 +996,8 @@ export const plPL = {
     viewDocs: "Zobacz dokumentację",
   },
   learn: {
+    liveRetrieval: "Przeszukuj notatnik podczas nauczania",
+    liveRetrievalDesc: "Klasa wyszukuje szczegóły w tym notatniku na żądanie — działa dla notatników większych niż prompt.",
     pageTitle: "Ucz się",
     pageDesc: "Interaktywne klasy AI generowane z Twoich notatników — slajdy, nauczyciel AI i quizy.",
     pageEmpty: "Brak klas. Wybierz notatnik powyżej i wygeneruj pierwszą.",

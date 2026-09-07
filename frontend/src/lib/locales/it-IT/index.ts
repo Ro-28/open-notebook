@@ -996,6 +996,8 @@ export const itIT = {
     viewDocs: "Vedi documentazione",
   },
   learn: {
+    liveRetrieval: "Cerca nel quaderno durante la lezione",
+    liveRetrievalDesc: "L'aula consulta questo quaderno su richiesta: funziona con quaderni più grandi del prompt.",
     pageTitle: "Impara",
     pageDesc: "Aule interattive con IA generate dai tuoi quaderni: slide, insegnante IA e quiz.",
     pageEmpty: "Nessuna aula ancora. Scegli un quaderno qui sopra e genera la prima.",

@@ -996,6 +996,8 @@ export const ptBR = {
     viewDocs: "Ver documentação",
   },
   learn: {
+    liveRetrieval: "Pesquisar no caderno ao ensinar",
+    liveRetrievalDesc: "A sala de aula busca detalhes deste caderno sob demanda — funciona com cadernos maiores que o prompt.",
     pageTitle: "Aprender",
     pageDesc: "Salas de aula interativas com IA geradas a partir dos seus cadernos: slides, professor IA e quizzes.",
     pageEmpty: "Nenhuma sala de aula ainda. Escolha um caderno acima e gere a primeira.",

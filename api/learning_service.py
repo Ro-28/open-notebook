@@ -9,7 +9,8 @@ job API, and track the job on a `learning_session` record.
 
 import asyncio
 import os
-from typing import Any, Dict, List, Optional
+import re
+from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 from loguru import logger
@@ -27,6 +28,29 @@ from open_notebook.exceptions import (
 # keep it well under typical 128k-token windows.
 DEFAULT_MAX_MATERIAL_CHARS = int(os.getenv("OPENMAIC_MAX_MATERIAL_CHARS", "120000"))
 PER_SOURCE_CHARS = int(os.getenv("OPENMAIC_PER_SOURCE_CHARS", "30000"))
+LIVE_RETRIEVAL_MATERIAL_CHARS = int(os.getenv("OPENMAIC_LIVE_MATERIAL_CHARS", "40000"))
+
+
+def open_notebook_internal_url() -> str:
+    """URL OpenMAIC (same host) uses to call back into this API."""
+    return os.getenv("OPEN_NOTEBOOK_INTERNAL_URL", f"http://127.0.0.1:{os.getenv('API_PORT', '5055')}").rstrip("/")
+
+
+SCOPE_TAG = re.compile(r"\[nb:([A-Za-z0-9_:\-]+)\]")
+
+
+def scope_tag(notebook_id: str) -> str:
+    return f"[nb:{notebook_id}]"
+
+
+def split_scope_tag(text: str) -> Tuple[str, Optional[str]]:
+    """Return (text without tag, notebook id) — the tag may have been rewritten away."""
+    m = SCOPE_TAG.search(text or "")
+    if not m:
+        return text, None
+    nb = m.group(1)
+    nb = nb if nb.startswith("notebook:") else f"notebook:{nb}"
+    return SCOPE_TAG.sub("", text).strip(), nb
 
 
 def openmaic_url() -> str:
@@ -124,13 +148,17 @@ async def create_learning_session(
     enable_tts: bool = False,
     enable_image_generation: bool = False,
     enable_web_search: bool = False,
+    live_retrieval: bool = True,
 ) -> LearningSession:
     notebook = await Notebook.get(notebook_id)
     if not notebook:
         raise NotFoundError(f"Notebook {notebook_id} not found")
 
+    # With live retrieval the classroom can pull details on demand, so the static bundle only
+    # needs to be an overview: cap it lower to leave prompt room for the retrieved passages.
+    max_chars = LIVE_RETRIEVAL_MATERIAL_CHARS if live_retrieval else DEFAULT_MAX_MATERIAL_CHARS
     bundle = await build_material_bundle(
-        notebook, include_sources, include_insights, include_notes
+        notebook, include_sources, include_insights, include_notes, max_chars=max_chars
     )
     if bundle["stats"]["sources"] + bundle["stats"]["notes"] == 0:
         raise InvalidInputError("Notebook has no sources or notes to learn from")
@@ -152,6 +180,7 @@ async def create_learning_session(
             "enable_tts": enable_tts,
             "enable_image_generation": enable_image_generation,
             "enable_web_search": enable_web_search,
+            "live_retrieval": live_retrieval,
         },
         material_stats=bundle["stats"],
     )
@@ -165,6 +194,14 @@ async def create_learning_session(
         "enableVideoGeneration": False,
         "enableWebSearch": enable_web_search,
     }
+    if live_retrieval:
+        # OpenMAIC's "web search" is pointed at Open Notebook: its keyless SearXNG provider is a
+        # plain JSON GET, which /api/learn/searxng/search emulates (SEARXNG_BASE_URL in the sidecar
+        # .env). The notebook scope travels inside the query as a `[nb:<id>]` tag that the
+        # requirement carries; the endpoint strips it and scopes the search. OpenMAIC is unmodified.
+        payload["enableWebSearch"] = True
+        payload["webSearchProviderId"] = "searxng"
+        payload["requirement"] = f"{requirement} {scope_tag(notebook_id)}"
     try:
         async with httpx.AsyncClient(timeout=60) as client:
             r = await client.post(
@@ -282,3 +319,87 @@ async def delete_learning_session(session_id: str) -> None:
     if not session:
         raise NotFoundError(f"Learning session {session_id} not found")
     await session.delete()
+
+
+async def _active_learning_notebook() -> Optional[str]:
+    """Notebook of the most recent running classroom job — OpenMAIC's query rewrite can drop
+    the ``[nb:]`` scope tag, and only one classroom is generated at a time in practice."""
+    try:
+        rows = await LearningSession.all_recent(limit=5)
+    except Exception:  # noqa: BLE001
+        return None
+    for s in rows:
+        if s.status in ("pending", "running"):
+            return s.notebook_id
+    return None
+
+
+async def notebook_search_as_searxng(
+    query: str, limit: int = 8, notebook_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """Search a notebook (vector, falling back to text) and answer in SearXNG's JSON shape.
+
+    The notebook comes from an explicit argument or a ``[nb:<id>]`` tag inside the query; without
+    either, the search spans every notebook (the tag can be lost in OpenMAIC's query rewrite).
+    """
+    from open_notebook.domain.notebook import text_search, vector_search
+
+    query, tagged = split_scope_tag((query or "").strip())
+    notebook_id = notebook_id or tagged or await _active_learning_notebook()
+    scope = [notebook_id] if notebook_id else None
+    if not query:
+        return {"query": query, "number_of_results": 0, "results": []}
+    try:
+        rows = await vector_search(query, limit, notebook_ids=scope)
+    except Exception as e:  # noqa: BLE001 - no embedding model, etc.
+        logger.warning(f"Learn retrieval: vector search failed ({e}); using text search")
+        rows = []
+    if not rows:
+        try:
+            rows = await text_search(query, limit, notebook_ids=scope)
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"Learn retrieval: text search failed: {e}")
+            rows = []
+    results = []
+    for i, row in enumerate(rows or []):
+        rid = str(row.get("id") or row.get("parent_id") or "")
+        matches = row.get("matches") or []
+        content = "\n".join(m for m in matches if isinstance(m, str)) if isinstance(matches, list) else str(matches)
+        kind = "note" if rid.startswith("note:") else "insight" if rid.startswith("source_insight:") else "source"
+        results.append(
+            {
+                "title": f"{row.get('title') or 'Untitled'} ({kind})",
+                # A stable, resolvable URL so OpenMAIC's URL registry/trust gate accepts it.
+                "url": f"{open_notebook_internal_url()}/api/learn/ref/{rid}",
+                "content": content[:2000],
+                "score": float(row.get("similarity") or (1 - i * 0.05)),
+            }
+        )
+    return {"query": query, "number_of_results": len(results), "results": results}
+
+
+async def learn_reference(record_id: str) -> Dict[str, Any]:
+    """Plain-text view of a source / note / insight for the sidecar's fetch_url tool."""
+    from fastapi.responses import PlainTextResponse
+
+    from open_notebook.domain.notebook import Note, Source, SourceInsight
+
+    table = record_id.split(":", 1)[0]
+    if table == "source":
+        src = await Source.get(record_id)
+        if not src:
+            raise NotFoundError(record_id)
+        body = f"# {src.title or 'Untitled'}\n\n{src.full_text or ''}"
+    elif table == "note":
+        note = await Note.get(record_id)
+        if not note:
+            raise NotFoundError(record_id)
+        body = f"# {note.title or 'Untitled'}\n\n{note.content or ''}"
+    elif table == "source_insight":
+        ins = await SourceInsight.get(record_id)
+        if not ins:
+            raise NotFoundError(record_id)
+        body = f"# Insight ({ins.insight_type})\n\n{ins.content}"
+    else:
+        raise InvalidInputError(f"Unsupported reference type: {table}")
+    return PlainTextResponse(body[:200_000])  # type: ignore[return-value]

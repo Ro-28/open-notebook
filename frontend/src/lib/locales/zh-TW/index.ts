@@ -996,6 +996,8 @@ export const zhTW = {
     viewDocs: "查看文件",
   },
   learn: {
+    liveRetrieval: "授課時檢索筆記本",
+    liveRetrievalDesc: "課堂依需求從此筆記本查詢細節——即使筆記本大於提示詞也可用。",
     pageTitle: "學習",
     pageDesc: "由你的筆記本產生的互動 AI 課堂——投影片、AI 教師與測驗。",
     pageEmpty: "還沒有課堂。在上方選擇一個筆記本並產生第一個。",

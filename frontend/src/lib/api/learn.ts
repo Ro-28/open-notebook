@@ -35,6 +35,7 @@ export interface LearningSessionCreate {
   enable_tts?: boolean
   enable_image_generation?: boolean
   enable_web_search?: boolean
+  live_retrieval?: boolean
 }
 
 export interface LearningStatus {

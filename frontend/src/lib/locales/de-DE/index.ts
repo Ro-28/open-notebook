@@ -999,6 +999,8 @@ export const deDE = {
     viewDocs: "Dokumentation anzeigen",
   },
   learn: {
+    liveRetrieval: "Beim Unterrichten im Notizbuch suchen",
+    liveRetrievalDesc: "Das Klassenzimmer schlägt Details bei Bedarf in diesem Notizbuch nach – auch bei Notizbüchern, die größer als der Prompt sind.",
     pageTitle: "Lernen",
     pageDesc: "Interaktive KI-Klassenzimmer aus deinen Notizbüchern – Folien, KI-Lehrer und Quiz.",
     pageEmpty: "Noch keine Klassenzimmer. Wähle oben ein Notizbuch und erzeuge das erste.",

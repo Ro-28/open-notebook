@@ -997,6 +997,8 @@ export const esES = {
     viewDocs: "Ver documentación",
   },
   learn: {
+    liveRetrieval: "Buscar en el cuaderno mientras enseña",
+    liveRetrievalDesc: "El aula consulta detalles de este cuaderno bajo demanda; funciona con cuadernos más grandes que el prompt.",
     pageTitle: "Aprender",
     pageDesc: "Aulas interactivas con IA generadas a partir de tus cuadernos: diapositivas, profesor IA y cuestionarios.",
     pageEmpty: "Aún no hay aulas. Elige un cuaderno arriba y genera la primera.",

@@ -996,6 +996,8 @@ export const zhCN = {
     viewDocs: "查看文档",
   },
   learn: {
+    liveRetrieval: "授课时检索笔记本",
+    liveRetrievalDesc: "课堂按需从此笔记本查找细节——即使笔记本大于提示词也可用。",
     pageTitle: "学习",
     pageDesc: "由你的笔记本生成的互动 AI 课堂——幻灯片、AI 教师和测验。",
     pageEmpty: "还没有课堂。在上方选择一个笔记本并生成第一个。",

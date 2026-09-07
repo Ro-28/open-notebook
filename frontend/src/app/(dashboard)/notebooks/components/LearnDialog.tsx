@@ -62,6 +62,7 @@ export function LearnDialog({ notebookId, notebookName, open, onOpenChange }: Le
   const [includeInsights, setIncludeInsights] = useState(true)
   const [includeNotes, setIncludeNotes] = useState(true)
   const [enableTts, setEnableTts] = useState(false)
+  const [liveRetrieval, setLiveRetrieval] = useState(true)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
 
@@ -76,6 +77,7 @@ export function LearnDialog({ notebookId, notebookName, open, onOpenChange }: Le
       include_insights: includeInsights,
       include_notes: includeNotes,
       enable_tts: enableTts,
+      live_retrieval: liveRetrieval,
     })
   }
 
@@ -174,6 +176,13 @@ export function LearnDialog({ notebookId, notebookName, open, onOpenChange }: Le
                   <label className="flex items-center gap-2">
                     <Checkbox checked={includeNotes} onCheckedChange={(v) => setIncludeNotes(v === true)} />
                     {t('learn.includeNotes')}
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox checked={liveRetrieval} onCheckedChange={(v) => setLiveRetrieval(v === true)} />
+                    <span>
+                      {t('learn.liveRetrieval')}
+                      <span className="block text-xs text-muted-foreground">{t('learn.liveRetrievalDesc')}</span>
+                    </span>
                   </label>
                   <label className="flex items-center gap-2">
                     <Checkbox checked={enableTts} onCheckedChange={(v) => setEnableTts(v === true)} />

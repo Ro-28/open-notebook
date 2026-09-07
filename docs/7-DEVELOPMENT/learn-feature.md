@@ -88,10 +88,23 @@ git add vendor/openmaic && git commit -m "chore: bump OpenMAIC"
 ```
 The launcher rebuilds when `package.json` changes.
 
+## Live retrieval ("Search the notebook while teaching")
+
+OpenMAIC's *web search* is pointed at Open Notebook instead of the internet:
+the sidecar `.env` sets `SEARXNG_BASE_URL=http://127.0.0.1:5055/api/learn/searxng`,
+and `GET /api/learn/searxng/search?q=…&format=json` answers in SearXNG's JSON
+shape by running Open Notebook's vector search (text-search fallback) scoped to
+the notebook. Scope resolution: explicit `notebook_id` → a `[nb:<id>]` tag the
+Learn service appends to the requirement → the notebook of the currently
+running classroom job. Each hit links to `GET /api/learn/ref/{record}` (plain
+text of the source/note/insight) so OpenMAIC's URL trust gate and `fetch_url`
+tool work. OpenMAIC itself is unmodified.
+
+With live retrieval on (default), the static material bundle is capped at
+`OPENMAIC_LIVE_MATERIAL_CHARS` (40k) — an overview — and the classroom pulls
+details on demand, so notebooks larger than the prompt work.
+
 ## Roadmap
 
-- Give OpenMAIC's agent a `search_notebook` tool that calls `/api/search` and
-  `/api/ask`, so the classroom can pull from the notebook live instead of a
-  static bundle.
 - Replace the iframe with `@openmaic/renderer` for a native in-app view.
 - Per-notebook default model / TTS voice.

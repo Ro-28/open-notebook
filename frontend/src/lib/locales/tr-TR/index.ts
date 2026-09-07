@@ -996,6 +996,8 @@ export const trTR = {
     viewDocs: "Belgeleri Görüntüle",
   },
   learn: {
+    liveRetrieval: "Öğretirken not defterinde ara",
+    liveRetrievalDesc: "Sınıf bu not defterinden gerektiğinde ayrıntı alır; prompt'tan büyük not defterlerinde de çalışır.",
     pageTitle: "Öğren",
     pageDesc: "Not defterlerinizden oluşturulan etkileşimli yapay zekâ sınıfları: slaytlar, yapay zekâ öğretmen ve sınavlar.",
     pageEmpty: "Henüz sınıf yok. Yukarıdan bir not defteri seçip ilkini oluşturun.",

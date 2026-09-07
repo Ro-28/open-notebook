@@ -996,6 +996,8 @@ export const caES = {
     viewDocs: "Visualitza la documentació",
   },
   learn: {
+    liveRetrieval: "Cerca al quadern mentre ensenya",
+    liveRetrievalDesc: "L'aula consulta detalls d'aquest quadern sota demanda; funciona amb quaderns més grans que el prompt.",
     pageTitle: "Aprèn",
     pageDesc: "Aules interactives amb IA generades a partir dels teus quaderns: diapositives, professor IA i qüestionaris.",
     pageEmpty: "Encara no hi ha aules. Tria un quadern a dalt i genera la primera.",

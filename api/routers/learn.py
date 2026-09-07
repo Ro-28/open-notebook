@@ -75,8 +75,27 @@ async def create_session(notebook_id: str, body: LearningSessionCreate):
         enable_tts=body.enable_tts,
         enable_image_generation=body.enable_image_generation,
         enable_web_search=body.enable_web_search,
+        live_retrieval=body.live_retrieval,
     )
     return _to_response(session)
+
+
+@router.get("/learn/searxng/search")
+async def notebook_search_searxng(
+    q: str = Query("", description="Search query; may carry a [nb:<notebook id>] scope tag"),
+    format: str = Query("json"),  # noqa: A002 - SearXNG parameter name
+    limit: int = Query(8, ge=1, le=25),
+    notebook_id: Optional[str] = Query(None),
+):
+    """SearXNG-compatible search over the knowledge base, consumed by the OpenMAIC sidecar as
+    its 'web search' backend so classrooms can pull from notebooks live."""
+    return await learning_service.notebook_search_as_searxng(q, limit, notebook_id)
+
+
+@router.get("/learn/ref/{record_id}")
+async def learn_reference(record_id: str):
+    """Resolve a search hit (source / note / insight) to its text — the URL OpenMAIC may fetch."""
+    return await learning_service.learn_reference(record_id)
 
 
 @router.get("/learn/{session_id}", response_model=LearningSessionResponse)

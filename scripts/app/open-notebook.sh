@@ -193,6 +193,8 @@ start_openmaic() {
       echo "# openrouter:gpt-5.5 (ChatGPT), openai:gpt-oss:120b (Ollama Cloud). Per-stage: MODEL_ROUTES."
       echo "DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001"
       echo "# Previous auto-pick: $default_model"
+      echo "# 'Web search' for classrooms = live retrieval from Open Notebook (SearXNG-compatible endpoint)"
+      echo "SEARXNG_BASE_URL=http://127.0.0.1:$API_PORT/api/learn/searxng"
       echo "# Let Open Notebook embed classrooms in its Learn dialog"
       echo "ALLOWED_FRAME_ANCESTORS=$UI_URL"
     } >"$MAIC_DIR/.env"

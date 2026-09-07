@@ -996,6 +996,8 @@ export const frFR = {
     viewDocs: "Voir la documentation",
   },
   learn: {
+    liveRetrieval: "Chercher dans le carnet pendant le cours",
+    liveRetrievalDesc: "La classe consulte ce carnet à la demande — fonctionne avec des carnets plus grands que le prompt.",
     pageTitle: "Apprendre",
     pageDesc: "Classes interactives avec IA générées à partir de vos carnets : diapositives, professeur IA et quiz.",
     pageEmpty: "Aucune classe pour l'instant. Choisissez un carnet ci-dessus et générez la première.",

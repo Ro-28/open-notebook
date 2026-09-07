@@ -837,6 +837,9 @@ class LearningSessionCreate(BaseModel):
     enable_tts: bool = False
     enable_image_generation: bool = False
     enable_web_search: bool = False
+    live_retrieval: bool = Field(
+        True, description="Let the classroom generator search this notebook live (via the sidecar's search tool)"
+    )
 
 
 class LearningSessionResponse(BaseModel):
