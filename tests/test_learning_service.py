@@ -123,3 +123,32 @@ async def test_searxng_shape_scopes_and_falls_back_to_text():
     assert out["number_of_results"] == 1
     r = out["results"][0]
     assert r["title"] == "Ceres (note)" and r["content"] == "940 km across" and r["url"].endswith("/api/learn/ref/note:1")
+
+
+@pytest.mark.asyncio
+async def test_progress_merges_and_spaces_reviews():
+    session = LearningSession(id="learning_session:1", notebook="notebook:n", title="t", requirement="r", status="succeeded")
+
+    async def get(_id, refresh=False):
+        return session
+
+    saved = []
+
+    async def save(self):
+        saved.append(dict(self.learner or {}))
+
+    with patch.object(learning_service, "get_learning_session", get), patch.object(LearningSession, "save", save):
+        s1 = await learning_service.update_learning_progress("x", {"scene_index": 1, "scenes_seen": ["a"]})
+        assert s1.learner["scene_index"] == 1 and s1.learner["scenes_seen"] == ["a"]
+        s2 = await learning_service.update_learning_progress("x", {"scenes_seen": ["b", "a"], "quiz": {"q": {"correct": 1, "total": 4, "wrong": ["1", "2", "3"]}}})
+        assert s2.learner["scenes_seen"] == ["a", "b"] and s2.quiz_score == 0.25
+        s3 = await learning_service.update_learning_progress("x", {"completed": True})
+        assert s3.completed_at and s3.review_due_at
+        # poor score => shortest interval (1 day)
+        assert (s3.review_due_at - s3.completed_at).days == 1
+        s4 = await learning_service.update_learning_progress("x", {"quiz": {"q": {"correct": 4, "total": 4, "wrong": []}}, "completed": True})
+        assert s4.quiz_score == 1.0 and s4.learner["reviews_done"] == 1
+        assert (s4.review_due_at - s4.completed_at).days == 3  # second pass, good score => next interval
+        s5 = await learning_service.update_learning_progress("x", {"completed": False})
+        assert s5.completed_at is None and s5.review_due_at is None
+    assert len(saved) == 5

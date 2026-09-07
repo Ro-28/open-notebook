@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ExternalLink, GraduationCap, Loader2, Maximize2, Minimize2, Trash2, X } from 'lucide-react'
+import { CheckCircle2, ExternalLink, GraduationCap, Loader2, Maximize2, Minimize2, RotateCcw, Trash2, X } from 'lucide-react'
 import { AppShell } from '@/components/layout/AppShell'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,14 @@ function statusVariant(status: LearningSession['status']) {
   return 'secondary' as const
 }
 
+function pct(n?: number | null) {
+  return n == null ? null : Math.round(n * 100)
+}
+
+function isDue(s: LearningSession) {
+  return !!s.review_due_at && new Date(s.review_due_at).getTime() <= Date.now()
+}
+
 export default function LearnPage() {
   const { t } = useTranslation()
   const status = useLearnStatus()
@@ -37,11 +45,13 @@ export default function LearnPage() {
   const notebooks = useNotebooks(false)
   const [pickedNotebook, setPickedNotebook] = useState<string>('')
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [active, setActive] = useState<LearningSession | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
-  const remove = useDeleteLearningSession(active?.notebook_id ?? '')
 
   const list = sessions.data ?? []
+  const due = list.filter(isDue)
+  const active = list.find((s) => s.id === activeId) ?? null
+  const remove = useDeleteLearningSession(active?.notebook_id ?? '')
   const available = status.data?.available ?? false
   const picked = notebooks.data?.find((n) => n.id === pickedNotebook)
 
@@ -66,7 +76,7 @@ export default function LearnPage() {
                   <Button variant="outline" size="sm" onClick={() => setFullscreen((f) => !f)}>
                     {fullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => { setActive(null); setFullscreen(false) }}>
+                  <Button variant="outline" size="sm" onClick={() => { setActiveId(null); setFullscreen(false) }}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -108,6 +118,17 @@ export default function LearnPage() {
                 </div>
               )}
 
+              {due.length > 0 && (
+                <div className="rounded-xl border border-gold/40 bg-gold-tint/40 p-4">
+                  <p className="font-medium flex items-center gap-2"><RotateCcw className="h-4 w-4 text-gold" />{t('learn.dueForReview', { count: due.length })}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {due.map((s) => (
+                      <Button key={s.id} size="sm" variant="outline" onClick={() => setActiveId(s.id)}>{s.title}</Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {sessions.isLoading ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -134,6 +155,19 @@ export default function LearnPage() {
                         <Badge variant={statusVariant(s.status)}>{t(STATUS_KEYS[s.status] ?? STATUS_KEYS.pending)}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-2">{s.requirement}</p>
+                      {s.status === 'succeeded' && (
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                          {s.completed_at ? (
+                            <Badge variant="default" className="gap-1"><CheckCircle2 className="h-3 w-3" />{t('learn.player.completed')}</Badge>
+                          ) : s.learner?.scenes_seen?.length ? (
+                            <Badge variant="secondary">{t('learn.inProgress', { n: s.learner.scenes_seen.length })}</Badge>
+                          ) : null}
+                          {pct(s.quiz_score) != null && (
+                            <Badge variant={(s.quiz_score ?? 0) >= 0.6 ? 'secondary' : 'destructive'}>{t('learn.quizScore', { pct: pct(s.quiz_score) })}</Badge>
+                          )}
+                          {isDue(s) && <Badge variant="outline" className="border-gold text-gold">{t('learn.reviewDue')}</Badge>}
+                        </div>
+                      )}
                       {(s.status === 'running' || s.status === 'pending') && (
                         <div className="space-y-1">
                           <Progress value={s.progress ?? 0} />
@@ -145,7 +179,7 @@ export default function LearnPage() {
                       )}
                       <div className="flex gap-2 mt-auto pt-1">
                         {s.status === 'succeeded' && s.classroom_url && (
-                          <Button size="sm" onClick={() => setActive(s)}>{t('learn.open')}</Button>
+                          <Button size="sm" onClick={() => setActiveId(s.id)}>{s.learner?.scenes_seen?.length && !s.completed_at ? t('learn.resume') : t('learn.open')}</Button>
                         )}
                         <Button
                           size="sm"

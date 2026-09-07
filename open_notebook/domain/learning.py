@@ -1,5 +1,6 @@
 """Learning sessions: a classroom generated from a notebook by the OpenMAIC sidecar."""
 
+from datetime import datetime
 from typing import Any, ClassVar, Dict, List, Optional, Union
 
 from pydantic import Field, field_validator
@@ -25,6 +26,12 @@ class LearningSession(ObjectModel):
     classroom_url: Optional[str] = None
     options: Optional[Dict[str, Any]] = Field(default_factory=dict)
     material_stats: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    # learner state (migration 26)
+    learner: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    completed_at: Optional[datetime] = None
+    last_opened_at: Optional[datetime] = None
+    quiz_score: Optional[float] = None
+    review_due_at: Optional[datetime] = None
 
     @field_validator("notebook", mode="before")
     @classmethod

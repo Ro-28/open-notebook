@@ -1,0 +1,7 @@
+-- Migration 26: learning progress (Learn feature)
+-- Per-classroom learner state: scene position, completion, quiz answers and scores.
+DEFINE FIELD IF NOT EXISTS learner ON TABLE learning_session FLEXIBLE TYPE option<object>;
+DEFINE FIELD IF NOT EXISTS completed_at ON TABLE learning_session TYPE option<datetime>;
+DEFINE FIELD IF NOT EXISTS last_opened_at ON TABLE learning_session TYPE option<datetime>;
+DEFINE FIELD IF NOT EXISTS quiz_score ON TABLE learning_session TYPE option<float>;
+DEFINE FIELD IF NOT EXISTS review_due_at ON TABLE learning_session TYPE option<datetime>;

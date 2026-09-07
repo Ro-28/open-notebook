@@ -1,0 +1,6 @@
+-- Rollback Migration 26
+REMOVE FIELD IF EXISTS learner ON TABLE learning_session;
+REMOVE FIELD IF EXISTS completed_at ON TABLE learning_session;
+REMOVE FIELD IF EXISTS last_opened_at ON TABLE learning_session;
+REMOVE FIELD IF EXISTS quiz_score ON TABLE learning_session;
+REMOVE FIELD IF EXISTS review_due_at ON TABLE learning_session;

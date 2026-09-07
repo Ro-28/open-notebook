@@ -22,8 +22,27 @@ export interface LearningSession {
     chars?: number
     truncated?: boolean
   } | null
+  learner?: {
+    scene_index?: number
+    step_index?: number
+    scenes_seen?: string[]
+    quiz?: Record<string, { correct: number; total: number; wrong: string[]; at?: string }>
+    reviews_done?: number
+  } | null
+  completed_at?: string | null
+  last_opened_at?: string | null
+  quiz_score?: number | null
+  review_due_at?: string | null
   created?: string | null
   updated?: string | null
+}
+
+export interface LearningProgressUpdate {
+  scene_index?: number
+  step_index?: number
+  scenes_seen?: string[]
+  quiz?: Record<string, { answers: Record<string, string[]>; correct: number; total: number; wrong: string[] }>
+  completed?: boolean
 }
 
 export interface LearningSessionCreate {
@@ -81,6 +100,11 @@ export const learnApi = {
 
   classroom: async (sessionId: string) => {
     const response = await apiClient.get<ClassroomDocument>(`/learn/${sessionId}/classroom`)
+    return response.data
+  },
+
+  progress: async (sessionId: string, data: LearningProgressUpdate) => {
+    const response = await apiClient.patch<LearningSession>(`/learn/${sessionId}/progress`, data)
     return response.data
   },
 

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Loader2, MonitorPlay, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useClassroomDocument } from '@/lib/hooks/use-learn'
+import { useClassroomDocument, useUpdateLearningProgress } from '@/lib/hooks/use-learn'
 import { useTranslation } from '@/lib/hooks/use-translation'
 import { ClassroomPlayer } from './ClassroomPlayer'
 import type { LearningSession } from '@/lib/api/learn'
@@ -17,6 +17,7 @@ export function ClassroomView({ session, className }: { session: LearningSession
   const { t } = useTranslation()
   const [mode, setMode] = useState<'native' | 'full'>('native')
   const doc = useClassroomDocument(mode === 'native' ? session.id : null)
+  const progress = useUpdateLearningProgress()
 
   return (
     <div className={cn('flex flex-col gap-2 h-full min-h-0', className)}>
@@ -42,7 +43,16 @@ export function ClassroomView({ session, className }: { session: LearningSession
           <Button variant="outline" size="sm" onClick={() => setMode('full')}>{t('learn.player.modeFull')}</Button>
         </div>
       ) : (
-        <ClassroomPlayer doc={doc.data} externalUrl={session.classroom_url} className="flex-1 min-h-0" />
+        <ClassroomPlayer
+          doc={doc.data}
+          externalUrl={session.classroom_url}
+          className="flex-1 min-h-0"
+          initialSceneIndex={session.learner?.scene_index ?? 0}
+          completed={!!session.completed_at}
+          onProgress={(sceneIndex, sceneId) => progress.mutate({ sessionId: session.id, data: { scene_index: sceneIndex, scenes_seen: [sceneId] } })}
+          onQuizResult={(sceneId, r) => progress.mutate({ sessionId: session.id, data: { quiz: { [sceneId]: r } } })}
+          onComplete={() => progress.mutate({ sessionId: session.id, data: { completed: true } })}
+        />
       )}
     </div>
   )

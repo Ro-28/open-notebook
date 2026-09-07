@@ -996,7 +996,14 @@ export const ruRU = {
     viewDocs: "Документация",
   },
   learn: {
+    dueForReview: "Пора повторить: {{count}}",
+    inProgress: "В процессе · просмотрено сцен: {{n}}",
+    quizScore: "Тест {{pct}}%",
+    reviewDue: "Пора повторить",
+    resume: "Продолжить",
     player: {
+      completed: "Завершено",
+      markComplete: "Отметить завершённым",
       mute: "Выключить озвучку",
       unmute: "Включить озвучку",
       modeNative: "Плеер",

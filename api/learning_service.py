@@ -11,6 +11,7 @@ import asyncio
 import json
 import os
 import re
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
@@ -431,3 +432,50 @@ async def get_classroom_document(session_id: str) -> Dict[str, Any]:
         '"/api/classroom-media/', f'"{public}/api/classroom-media/'
     )
     return json.loads(text)
+
+
+REVIEW_INTERVALS_DAYS = [1, 3, 7, 14, 30]
+
+
+def _next_review(score: Optional[float], reviews_done: int) -> datetime:
+    """Simple spaced repetition: good scores stretch the interval, poor ones reset it."""
+    idx = min(reviews_done, len(REVIEW_INTERVALS_DAYS) - 1)
+    if score is not None and score < 0.6:
+        idx = 0
+    return datetime.now(timezone.utc) + timedelta(days=REVIEW_INTERVALS_DAYS[idx])
+
+
+async def update_learning_progress(session_id: str, update: Dict[str, Any]) -> LearningSession:
+    session = await get_learning_session(session_id, refresh=False)
+    progress: Dict[str, Any] = dict(session.learner or {})
+    now = datetime.now(timezone.utc)
+    if update.get("scene_index") is not None:
+        progress["scene_index"] = update["scene_index"]
+    if update.get("step_index") is not None:
+        progress["step_index"] = update["step_index"]
+    if update.get("scenes_seen"):
+        seen = set(progress.get("scenes_seen") or [])
+        seen.update(update["scenes_seen"])
+        progress["scenes_seen"] = sorted(seen)
+    if update.get("quiz"):
+        quizzes: Dict[str, Any] = dict(progress.get("quiz") or {})
+        for scene_id, result in update["quiz"].items():
+            quizzes[scene_id] = {**result, "at": now.isoformat()}
+        progress["quiz"] = quizzes
+        correct = sum(int(q.get("correct") or 0) for q in quizzes.values())
+        total = sum(int(q.get("total") or 0) for q in quizzes.values())
+        session.quiz_score = round(correct / total, 3) if total else None
+    session.last_opened_at = now
+    if update.get("completed") is True:
+        reviews_done = int(progress.get("reviews_done") or 0)
+        if session.completed_at:  # re-completing a classroom = a review pass
+            reviews_done += 1
+        progress["reviews_done"] = reviews_done
+        session.completed_at = now
+        session.review_due_at = _next_review(session.quiz_score, reviews_done)
+    elif update.get("completed") is False:
+        session.completed_at = None
+        session.review_due_at = None
+    session.learner = progress
+    await session.save()
+    return session

@@ -995,7 +995,14 @@ export const enUS = {
     viewDocs: "View docs",
   },
   learn: {
+    dueForReview: "{{count}} classroom(s) due for review",
+    inProgress: "In progress · {{n}} scenes seen",
+    quizScore: "Quiz {{pct}}%",
+    reviewDue: "Review due",
+    resume: "Resume",
     player: {
+      completed: "Completed",
+      markComplete: "Mark complete",
       mute: "Mute narration",
       unmute: "Unmute narration",
       modeNative: "Player",

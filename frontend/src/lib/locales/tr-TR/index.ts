@@ -996,7 +996,14 @@ export const trTR = {
     viewDocs: "Belgeleri Görüntüle",
   },
   learn: {
+    dueForReview: "Tekrar zamanı gelen sınıf: {{count}}",
+    inProgress: "Devam ediyor · {{n}} sahne görüldü",
+    quizScore: "Sınav %{{pct}}",
+    reviewDue: "Tekrar zamanı",
+    resume: "Devam et",
     player: {
+      completed: "Tamamlandı",
+      markComplete: "Tamamlandı olarak işaretle",
       mute: "Anlatımı sustur",
       unmute: "Anlatımı aç",
       modeNative: "Oynatıcı",

@@ -996,7 +996,14 @@ export const zhTW = {
     viewDocs: "查看文件",
   },
   learn: {
+    dueForReview: "{{count}} 個課堂待複習",
+    inProgress: "進行中 · 已看 {{n}} 個場景",
+    quizScore: "測驗 {{pct}}%",
+    reviewDue: "待複習",
+    resume: "繼續",
     player: {
+      completed: "已完成",
+      markComplete: "標記為完成",
       mute: "靜音講解",
       unmute: "開啟講解",
       modeNative: "播放器",

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { learnApi, LearningSession, LearningSessionCreate } from '@/lib/api/learn'
+import { learnApi, LearningProgressUpdate, LearningSession, LearningSessionCreate } from '@/lib/api/learn'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useTranslation } from '@/lib/hooks/use-translation'
 import { getApiErrorKey } from '@/lib/utils/error-handler'
@@ -47,6 +47,17 @@ export function useClassroomDocument(sessionId: string | null | undefined) {
     queryFn: () => learnApi.classroom(sessionId as string),
     enabled: !!sessionId,
     staleTime: 10 * 60 * 1000,
+  })
+}
+
+export function useUpdateLearningProgress() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ sessionId, data }: { sessionId: string; data: LearningProgressUpdate }) => learnApi.progress(sessionId, data),
+    onSuccess: (session) => {
+      queryClient.setQueryData<LearningSession[]>(LEARN_KEYS.all, (list) => list?.map((s) => (s.id === session.id ? session : s)))
+      queryClient.setQueryData<LearningSession[]>(LEARN_KEYS.sessions(session.notebook_id), (list) => list?.map((s) => (s.id === session.id ? session : s)))
+    },
   })
 }
 

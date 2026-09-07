@@ -997,7 +997,14 @@ export const esES = {
     viewDocs: "Ver documentación",
   },
   learn: {
+    dueForReview: "{{count}} aula(s) pendientes de repaso",
+    inProgress: "En curso · {{n}} escenas vistas",
+    quizScore: "Test {{pct}}%",
+    reviewDue: "Repaso pendiente",
+    resume: "Continuar",
     player: {
+      completed: "Completada",
+      markComplete: "Marcar como completada",
       mute: "Silenciar narración",
       unmute: "Activar narración",
       modeNative: "Reproductor",

@@ -996,7 +996,14 @@ export const zhCN = {
     viewDocs: "查看文档",
   },
   learn: {
+    dueForReview: "{{count}} 个课堂待复习",
+    inProgress: "进行中 · 已看 {{n}} 个场景",
+    quizScore: "测验 {{pct}}%",
+    reviewDue: "待复习",
+    resume: "继续",
     player: {
+      completed: "已完成",
+      markComplete: "标记为完成",
       mute: "静音讲解",
       unmute: "开启讲解",
       modeNative: "播放器",

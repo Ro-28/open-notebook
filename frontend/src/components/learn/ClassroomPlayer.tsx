@@ -62,18 +62,35 @@ function buildSteps(actions: Action[] | undefined) {
   return steps
 }
 
+export interface QuizResult {
+  answers: Record<string, string[]>
+  correct: number
+  total: number
+  wrong: string[]
+}
+
 export function ClassroomPlayer({
   doc,
   externalUrl,
   className,
+  initialSceneIndex = 0,
+  onProgress,
+  onQuizResult,
+  onComplete,
+  completed = false,
 }: {
   doc: ClassroomDocument
   externalUrl?: string | null
   className?: string
+  initialSceneIndex?: number
+  onProgress?: (sceneIndex: number, sceneId: string) => void
+  onQuizResult?: (sceneId: string, result: QuizResult) => void
+  onComplete?: () => void
+  completed?: boolean
 }) {
   const { t } = useTranslation()
   const scenes = useMemo(() => [...doc.scenes].sort((a, b) => a.order - b.order) as AnyScene[], [doc.scenes])
-  const [sceneIdx, setSceneIdx] = useState(0)
+  const [sceneIdx, setSceneIdx] = useState(() => Math.min(Math.max(0, initialSceneIndex), Math.max(0, doc.scenes.length - 1)))
   const [stepIdx, setStepIdx] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
@@ -82,6 +99,11 @@ export function ClassroomPlayer({
 
   const scene = scenes[sceneIdx]
   const steps = useMemo(() => buildSteps(scene?.actions as Action[] | undefined), [scene])
+
+  useEffect(() => {
+    if (scene) onProgress?.(sceneIdx, scene.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneIdx, scene?.id])
   const step = steps[stepIdx]
 
   const goScene = useCallback(
@@ -151,6 +173,7 @@ export function ClassroomPlayer({
   const canvas = scene.content.type === 'slide' ? scene.content.canvas : undefined
   const isQuiz = scene.content.type === 'quiz'
   const unsupported = !canvas && !isQuiz
+  const isLast = sceneIdx === scenes.length - 1
 
   return (
     <div className={cn('flex flex-col gap-3 h-full min-h-0', className)}>
@@ -181,7 +204,7 @@ export function ClassroomPlayer({
               </div>
             </div>
           ) : isQuiz ? (
-            <QuizView key={scene.id} questions={scene.content.questions ?? []} />
+            <QuizView key={scene.id} questions={scene.content.questions ?? []} onResult={(r) => onQuizResult?.(scene.id, r)} />
           ) : (
             <div className="text-center text-sm text-muted-foreground p-8">
               <p>{t('learn.player.unsupportedScene', { type: scene.content.type })}</p>
@@ -232,9 +255,16 @@ export function ClassroomPlayer({
             <Button variant={playing ? 'secondary' : 'default'} size="sm" onClick={() => setPlaying((p) => !p)} aria-label={playing ? t('learn.player.pause') : t('learn.player.play')}>
               {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
-            <Button variant="outline" size="sm" onClick={next} disabled={sceneIdx === scenes.length - 1 && stepIdx >= steps.length - 1} aria-label={t('learn.player.next')}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            {isLast && stepIdx >= steps.length - 1 ? (
+              <Button size="sm" variant={completed ? 'secondary' : 'default'} onClick={onComplete} disabled={completed}>
+                <CheckCircle2 className="h-4 w-4 mr-1.5" />
+                {completed ? t('learn.player.completed') : t('learn.player.markComplete')}
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={next} aria-label={t('learn.player.next')}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -261,7 +291,7 @@ export function ClassroomPlayer({
   )
 }
 
-function QuizView({ questions }: { questions: QuizQuestion[] }) {
+function QuizView({ questions, onResult }: { questions: QuizQuestion[]; onResult?: (r: QuizResult) => void }) {
   const { t } = useTranslation()
   const [answers, setAnswers] = useState<Record<string, string[]>>({})
   const [shortAnswers, setShortAnswers] = useState<Record<string, string>>({})
@@ -280,8 +310,18 @@ function QuizView({ questions }: { questions: QuizQuestion[] }) {
     const want = [...q.answer].sort().join('|')
     return got === want
   }
-  const score = questions.filter((q) => q.type !== 'short_answer' && isCorrect(q) === true).length
-  const gradable = questions.filter((q) => q.type !== 'short_answer' && q.answer?.length).length
+  const gradableQs = questions.filter((q) => q.type !== 'short_answer' && q.answer?.length)
+  const score = gradableQs.filter((q) => isCorrect(q) === true).length
+  const gradable = gradableQs.length
+  const reveal = () => {
+    setRevealed(true)
+    onResult?.({
+      answers,
+      correct: score,
+      total: gradable,
+      wrong: gradableQs.filter((q) => isCorrect(q) !== true).map((q) => q.id),
+    })
+  }
 
   return (
     <div className="w-full h-full overflow-y-auto space-y-5 p-2">
@@ -322,7 +362,7 @@ function QuizView({ questions }: { questions: QuizQuestion[] }) {
         )
       })}
       <div className="flex items-center gap-3">
-        <Button onClick={() => setRevealed(true)} disabled={revealed}>{t('learn.player.checkAnswers')}</Button>
+        <Button onClick={reveal} disabled={revealed}>{t('learn.player.checkAnswers')}</Button>
         {revealed && gradable > 0 && (
           <span className="text-sm text-muted-foreground">{t('learn.player.score', { score, total: gradable })}</span>
         )}

@@ -996,7 +996,14 @@ export const frFR = {
     viewDocs: "Voir la documentation",
   },
   learn: {
+    dueForReview: "{{count}} classe(s) à réviser",
+    inProgress: "En cours · {{n}} scènes vues",
+    quizScore: "Quiz {{pct}} %",
+    reviewDue: "Révision due",
+    resume: "Reprendre",
     player: {
+      completed: "Terminée",
+      markComplete: "Marquer comme terminée",
       mute: "Couper la narration",
       unmute: "Activer la narration",
       modeNative: "Lecteur",

@@ -996,7 +996,14 @@ export const jaJP = {
     viewDocs: "ドキュメントを見る",
   },
   learn: {
+    dueForReview: "復習予定の教室：{{count}}",
+    inProgress: "進行中 · {{n}} シーン閲覧",
+    quizScore: "クイズ {{pct}}%",
+    reviewDue: "復習の時期",
+    resume: "再開",
     player: {
+      completed: "完了",
+      markComplete: "完了にする",
       mute: "ナレーションをミュート",
       unmute: "ナレーションを再生",
       modeNative: "プレーヤー",

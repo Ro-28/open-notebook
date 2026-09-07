@@ -996,7 +996,14 @@ export const caES = {
     viewDocs: "Visualitza la documentació",
   },
   learn: {
+    dueForReview: "{{count}} aula/es pendents de repàs",
+    inProgress: "En curs · {{n}} escenes vistes",
+    quizScore: "Qüestionari {{pct}}%",
+    reviewDue: "Repàs pendent",
+    resume: "Reprèn",
     player: {
+      completed: "Completada",
+      markComplete: "Marca com a completada",
       mute: "Silencia la narració",
       unmute: "Activa la narració",
       modeNative: "Reproductor",

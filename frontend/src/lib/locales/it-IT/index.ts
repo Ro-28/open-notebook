@@ -996,7 +996,14 @@ export const itIT = {
     viewDocs: "Vedi documentazione",
   },
   learn: {
+    dueForReview: "{{count}} aula/e da ripassare",
+    inProgress: "In corso · {{n}} scene viste",
+    quizScore: "Quiz {{pct}}%",
+    reviewDue: "Ripasso in scadenza",
+    resume: "Riprendi",
     player: {
+      completed: "Completata",
+      markComplete: "Segna come completata",
       mute: "Disattiva audio",
       unmute: "Attiva audio",
       modeNative: "Player",

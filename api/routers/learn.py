@@ -6,6 +6,7 @@ from fastapi import APIRouter, Query
 
 from api import learning_service
 from api.models import (
+    LearningProgressUpdate,
     LearningSessionCreate,
     LearningSessionResponse,
     LearningStatusResponse,
@@ -32,6 +33,11 @@ def _to_response(s: LearningSession, notebook_name: Optional[str] = None) -> Lea
         classroom_url=s.classroom_url,
         options=s.options,
         material_stats=s.material_stats,
+        learner=s.learner,
+        completed_at=str(s.completed_at) if s.completed_at else None,
+        last_opened_at=str(s.last_opened_at) if s.last_opened_at else None,
+        quiz_score=s.quiz_score,
+        review_due_at=str(s.review_due_at) if s.review_due_at else None,
         created=str(s.created) if s.created else None,
         updated=str(s.updated) if s.updated else None,
     )
@@ -102,6 +108,13 @@ async def learn_reference(record_id: str):
 async def get_classroom(session_id: str):
     """Classroom document (stage + scenes) for the in-app renderer."""
     return await learning_service.get_classroom_document(session_id)
+
+
+@router.patch("/learn/{session_id}/progress", response_model=LearningSessionResponse)
+async def update_progress(session_id: str, body: LearningProgressUpdate):
+    """Learner state from the native player: position, scenes seen, quiz results, completion."""
+    session = await learning_service.update_learning_progress(session_id, body.model_dump(exclude_none=True))
+    return _to_response(session)
 
 
 @router.get("/learn/{session_id}", response_model=LearningSessionResponse)

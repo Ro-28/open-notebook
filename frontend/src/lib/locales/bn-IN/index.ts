@@ -997,7 +997,14 @@ export const bnIN = {
     viewDocs: "ডকুমেন্টেশন দেখুন",
   },
   learn: {
+    dueForReview: "{{count}}টি ক্লাসরুম পুনরালোচনার জন্য প্রস্তুত",
+    inProgress: "চলছে · {{n}}টি দৃশ্য দেখা হয়েছে",
+    quizScore: "কুইজ {{pct}}%",
+    reviewDue: "পুনরালোচনা বাকি",
+    resume: "চালিয়ে যান",
     player: {
+      completed: "সম্পন্ন",
+      markComplete: "সম্পন্ন হিসেবে চিহ্নিত করুন",
       mute: "বর্ণনা মিউট করুন",
       unmute: "বর্ণনা চালু করুন",
       modeNative: "প্লেয়ার",

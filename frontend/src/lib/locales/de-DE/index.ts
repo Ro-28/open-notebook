@@ -999,7 +999,14 @@ export const deDE = {
     viewDocs: "Dokumentation anzeigen",
   },
   learn: {
+    dueForReview: "{{count}} Klassenzimmer zur Wiederholung fällig",
+    inProgress: "In Arbeit · {{n}} Szenen gesehen",
+    quizScore: "Quiz {{pct}} %",
+    reviewDue: "Wiederholung fällig",
+    resume: "Fortsetzen",
     player: {
+      completed: "Abgeschlossen",
+      markComplete: "Als abgeschlossen markieren",
       mute: "Erzählung stumm",
       unmute: "Erzählung an",
       modeNative: "Player",

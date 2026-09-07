@@ -996,7 +996,14 @@ export const ptBR = {
     viewDocs: "Ver documentação",
   },
   learn: {
+    dueForReview: "{{count}} sala(s) para revisar",
+    inProgress: "Em andamento · {{n}} cenas vistas",
+    quizScore: "Quiz {{pct}}%",
+    reviewDue: "Revisão pendente",
+    resume: "Continuar",
     player: {
+      completed: "Concluída",
+      markComplete: "Marcar como concluída",
       mute: "Silenciar narração",
       unmute: "Ativar narração",
       modeNative: "Player",

@@ -858,8 +858,26 @@ class LearningSessionResponse(BaseModel):
     classroom_url: Optional[str] = None
     options: Optional[Dict[str, Any]] = None
     material_stats: Optional[Dict[str, Any]] = None
+    learner: Optional[Dict[str, Any]] = None
+    completed_at: Optional[str] = None
+    last_opened_at: Optional[str] = None
+    quiz_score: Optional[float] = None
+    review_due_at: Optional[str] = None
     created: Optional[str] = None
     updated: Optional[str] = None
+
+
+class LearningProgressUpdate(BaseModel):
+    """Learner state pushed by the native player (merged into the session)."""
+
+    scene_index: Optional[int] = Field(None, ge=0)
+    step_index: Optional[int] = Field(None, ge=0)
+    scenes_seen: Optional[List[str]] = Field(None, description="Scene ids the learner has viewed")
+    quiz: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Quiz results keyed by scene id: {answers: {qid: [values]}, correct: n, total: n, wrong: [qid]}",
+    )
+    completed: Optional[bool] = Field(None, description="Mark the classroom completed (or reopen with false)")
 
 
 class LearningStatusResponse(BaseModel):
