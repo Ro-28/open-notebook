@@ -5,7 +5,7 @@
 #   open-notebook.sh status  -> print what is running
 #   open-notebook.sh logs    -> tail all logs
 #
-# State lives in data/app/ (pids + logs). Ports: SurrealDB 8000, API 5055, UI 3000.
+# State lives in data/app/ (pids + logs). Ports: SurrealDB 8000, API 5055, UI 3000, OpenMAIC 3100.
 
 set -u
 
@@ -20,6 +20,8 @@ SURREAL_PORT="${SURREAL_PORT:-8000}"
 API_PORT="${API_PORT:-5055}"
 UI_PORT="${UI_PORT:-3000}"
 UI_URL="http://localhost:$UI_PORT"
+MAIC_PORT="${OPENMAIC_PORT:-3100}"
+MAIC_DIR="$ROOT/vendor/openmaic"
 
 # GUI launches do not inherit the shell PATH.
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$PATH"
@@ -58,6 +60,7 @@ SURREAL_DATABASE=open_notebook
 API_HOST=127.0.0.1
 API_PORT=$API_PORT
 API_RELOAD=false
+OPENMAIC_URL=http://localhost:$MAIC_PORT
 EOF
   fi
 }
@@ -122,8 +125,64 @@ start() {
     wait_port frontend "$UI_PORT" 60 || return 1
   fi
 
-  log "✅ Open Notebook is up: $UI_URL  (API http://localhost:$API_PORT)"
+  # 5. OpenMAIC (Learn feature) — optional; skipped if the submodule is missing
+  start_openmaic || log "⚠️  OpenMAIC not started; the Learn tab will be unavailable"
+
+  log "✅ Open Notebook is up: $UI_URL  (API http://localhost:$API_PORT, Learn http://localhost:$MAIC_PORT)"
   echo "$UI_URL"
+}
+
+start_openmaic() {
+  [ -f "$MAIC_DIR/package.json" ] || { log "• vendor/openmaic missing (git submodule update --init)"; return 1; }
+  if [ ! -f "$MAIC_DIR/.env" ]; then
+    log "Creating vendor/openmaic/.env"
+    # Read a key from the environment or ~/.hermes/.env
+    read_key() { local v="${!1:-}"; [ -z "$v" ] && [ -f "$HOME/.hermes/.env" ] && v="$(grep -E "^$1=" "$HOME/.hermes/.env" | head -1 | cut -d= -f2- | tr -d '"'"'"'')"; printf '%s' "$v"; }
+    local ollama_key cline_key
+    ollama_key="$(read_key OLLAMA_API_KEY)"; cline_key="$(read_key CLINE_API_KEY)"
+    if [ -n "$ollama_key" ]; then
+      cat >"$MAIC_DIR/.env" <<EOF
+# OpenMAIC sidecar config for Open Notebook's Learn feature (generated; edit freely).
+# Ollama Cloud, OpenAI-compatible endpoint.
+OPENAI_API_KEY=$ollama_key
+OPENAI_BASE_URL=https://ollama.com/v1
+# Free tier: gpt-oss:120b, gpt-oss:20b, gemma4:31b, nemotron-3-nano:30b. Paid: glm-5.3, deepseek-v4-flash:0731, kimi-k2.7-code ...
+OPENAI_MODELS=gpt-oss:120b,gpt-oss:20b,gemma4:31b,nemotron-3-nano:30b,glm-5.3,deepseek-v4-flash:0731
+DEFAULT_MODEL=openai:gpt-oss:120b
+# Let Open Notebook embed classrooms in its Learn dialog
+ALLOWED_FRAME_ANCESTORS=$UI_URL
+EOF
+    else
+      cat >"$MAIC_DIR/.env" <<EOF
+# OpenMAIC sidecar config for Open Notebook's Learn feature (generated; edit freely).
+# Cline relay, OpenAI-compatible endpoint. Set OPENAI_API_KEY if empty.
+OPENAI_API_KEY=$cline_key
+OPENAI_BASE_URL=https://api.cline.bot/api/v1
+OPENAI_MODELS=z-ai/glm-5.3,deepseek/deepseek-v4-flash-0731
+DEFAULT_MODEL=openai:z-ai/glm-5.3
+# Let Open Notebook embed classrooms in its Learn dialog
+ALLOWED_FRAME_ANCESTORS=$UI_URL
+EOF
+    fi
+  fi
+  if [ ! -d "$MAIC_DIR/node_modules" ]; then
+    log "Installing OpenMAIC deps (pnpm install, ~1 min)"
+    (cd "$MAIC_DIR" && pnpm install --frozen-lockfile) >>"$LOG_DIR/setup.log" 2>&1 || { log "❌ pnpm install failed (see $LOG_DIR/setup.log)"; return 1; }
+  fi
+  # next.config.ts bakes ALLOWED_FRAME_ANCESTORS into the build: rebuild if it changed
+  local want_ancestors="$UI_URL" built_ancestors=""
+  [ -f "$MAIC_DIR/.next/frame-ancestors" ] && built_ancestors="$(cat "$MAIC_DIR/.next/frame-ancestors")"
+  if [ ! -f "$MAIC_DIR/.next/BUILD_ID" ] || [ "$MAIC_DIR/package.json" -nt "$MAIC_DIR/.next/BUILD_ID" ] || [ "$built_ancestors" != "$want_ancestors" ]; then
+    log "Building OpenMAIC (first run, several minutes)"
+    (cd "$MAIC_DIR" && ALLOWED_FRAME_ANCESTORS="$want_ancestors" pnpm build) >>"$LOG_DIR/build-openmaic.log" 2>&1 || { log "❌ OpenMAIC build failed (see $LOG_DIR/build-openmaic.log)"; return 1; }
+    printf '%s' "$want_ancestors" >"$MAIC_DIR/.next/frame-ancestors"
+  fi
+  if port_busy "$MAIC_PORT" && ! alive openmaic; then
+    log "• OpenMAIC port $MAIC_PORT already in use — reusing"
+  else
+    start_bg openmaic env PORT="$MAIC_PORT" HOSTNAME=127.0.0.1 bash -c "cd '$MAIC_DIR' && exec pnpm start"
+    wait_port openmaic "$MAIC_PORT" 90 || return 1
+  fi
 }
 
 stop_one() {
@@ -141,20 +200,21 @@ stop_one() {
 }
 
 stop() {
-  for n in frontend worker api surrealdb; do stop_one "$n"; done
+  for n in openmaic frontend worker api surrealdb; do stop_one "$n"; done
   # safety net: anything still holding our ports that we spawned from this repo
   pkill -f "$ROOT/frontend/.next/standalone/.*server.js" 2>/dev/null
   pkill -f "uvicorn api.main:app --host 127.0.0.1 --port $API_PORT" 2>/dev/null
   pkill -f "surreal-commands-worker --import-modules commands" 2>/dev/null
   pkill -f "rocksdb://$DB_DIR/open_notebook.db" 2>/dev/null
+  pkill -f "next start.*$MAIC_DIR\|$MAIC_DIR/node_modules/.*next" 2>/dev/null
   log "🛑 Open Notebook stopped"
 }
 
 status() {
-  for n in surrealdb api worker frontend; do
+  for n in surrealdb api worker frontend openmaic; do
     if alive "$n"; then echo "$n: running (pid $(pid_of "$n"))"; else echo "$n: stopped"; fi
   done
-  for p in "$SURREAL_PORT" "$API_PORT" "$UI_PORT"; do port_busy "$p" && echo "port $p: listening" || echo "port $p: free"; done
+  for p in "$SURREAL_PORT" "$API_PORT" "$UI_PORT" "$MAIC_PORT"; do port_busy "$p" && echo "port $p: listening" || echo "port $p: free"; done
 }
 
 case "${1:-}" in

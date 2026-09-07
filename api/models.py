@@ -822,3 +822,45 @@ class NotebookDeleteResponse(BaseModel):
     deleted_chat_sessions: int = Field(
         ..., description="Number of chat sessions deleted"
     )
+
+
+
+# Learn (OpenMAIC classroom) API models
+class LearningSessionCreate(BaseModel):
+    requirement: Optional[str] = Field(
+        None, description="What the lesson should teach; defaults to a notebook summary lesson"
+    )
+    title: Optional[str] = None
+    include_sources: bool = True
+    include_insights: bool = True
+    include_notes: bool = True
+    enable_tts: bool = False
+    enable_image_generation: bool = False
+    enable_web_search: bool = False
+
+
+class LearningSessionResponse(BaseModel):
+    id: str
+    notebook_id: str
+    title: str
+    requirement: str
+    status: str
+    step: Optional[str] = None
+    progress: Optional[int] = None
+    message: Optional[str] = None
+    error: Optional[str] = None
+    job_id: Optional[str] = None
+    classroom_id: Optional[str] = None
+    classroom_url: Optional[str] = None
+    options: Optional[Dict[str, Any]] = None
+    material_stats: Optional[Dict[str, Any]] = None
+    created: Optional[str] = None
+    updated: Optional[str] = None
+
+
+class LearningStatusResponse(BaseModel):
+    available: bool
+    url: str
+    public_url: str
+    status_code: Optional[int] = None
+    error: Optional[str] = None

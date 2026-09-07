@@ -11,7 +11,7 @@ on ctl(cmd)
 end ctl
 
 on showControl()
-	set r to display dialog "Open Notebook is running." & return & return & uiURL & return & "API: http://localhost:5055" & return & return & "Quitting this app shuts down all services." buttons {"Show Logs", "Quit Open Notebook", "Keep Running"} default button "Keep Running" with title "Open Notebook" with icon note
+	set r to display dialog "Open Notebook is running." & return & return & uiURL & return & "API: http://localhost:5055" & return & "Learn (OpenMAIC): http://localhost:3100" & return & return & "Quitting this app shuts down all services." buttons {"Show Logs", "Quit Open Notebook", "Keep Running"} default button "Keep Running" with title "Open Notebook" with icon note
 	set b to button returned of r
 	if b is "Quit Open Notebook" then
 		quit

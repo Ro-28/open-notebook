@@ -1,0 +1,3 @@
+[submodule "vendor/openmaic"]
+	path = vendor/openmaic
+	url = https://github.com/THU-MAIC/OpenMAIC

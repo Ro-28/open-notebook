@@ -1,0 +1,22 @@
+-- Migration 25: learning sessions (Learn feature, powered by an OpenMAIC sidecar)
+-- A learning_session records one classroom generated from a notebook's
+-- sources / notes / insights. The classroom itself lives in OpenMAIC
+-- (vendor/openmaic, data/classrooms); we keep the ids needed to poll and embed it.
+
+DEFINE TABLE IF NOT EXISTS learning_session SCHEMAFULL;
+DEFINE FIELD IF NOT EXISTS notebook ON TABLE learning_session TYPE record<notebook>;
+DEFINE FIELD IF NOT EXISTS title ON TABLE learning_session TYPE string;
+DEFINE FIELD IF NOT EXISTS requirement ON TABLE learning_session TYPE string;
+DEFINE FIELD IF NOT EXISTS status ON TABLE learning_session TYPE string DEFAULT 'pending';
+DEFINE FIELD IF NOT EXISTS step ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS progress ON TABLE learning_session TYPE option<int>;
+DEFINE FIELD IF NOT EXISTS message ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS error ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS job_id ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS classroom_id ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS classroom_url ON TABLE learning_session TYPE option<string>;
+DEFINE FIELD IF NOT EXISTS options ON TABLE learning_session FLEXIBLE TYPE option<object>;
+DEFINE FIELD IF NOT EXISTS material_stats ON TABLE learning_session FLEXIBLE TYPE option<object>;
+DEFINE FIELD IF NOT EXISTS created ON TABLE learning_session TYPE datetime DEFAULT time::now();
+DEFINE FIELD IF NOT EXISTS updated ON TABLE learning_session TYPE datetime DEFAULT time::now();
+DEFINE INDEX IF NOT EXISTS idx_learning_session_notebook ON learning_session FIELDS notebook;

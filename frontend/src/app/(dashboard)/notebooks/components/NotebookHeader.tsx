@@ -4,9 +4,10 @@ import { useState } from 'react'
 import { NotebookResponse } from '@/lib/types/api'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Archive, ArchiveRestore, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, GraduationCap, Trash2 } from 'lucide-react'
 import { useUpdateNotebook } from '@/lib/hooks/use-notebooks'
 import { NotebookDeleteDialog } from './NotebookDeleteDialog'
+import { LearnDialog } from './LearnDialog'
 import { formatDistanceToNow } from 'date-fns'
 import { getDateLocale } from '@/lib/utils/date-locale'
 import { InlineEdit } from '@/components/common/InlineEdit'
@@ -20,6 +21,7 @@ export function NotebookHeader({ notebook }: NotebookHeaderProps) {
   const { t, language } = useTranslation()
   const dfLocale = getDateLocale(language)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showLearnDialog, setShowLearnDialog] = useState(false)
   
   const updateNotebook = useUpdateNotebook()
 
@@ -68,6 +70,14 @@ export function NotebookHeader({ notebook }: NotebookHeaderProps) {
               )}
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setShowLearnDialog(true)}
+              >
+                <GraduationCap className="h-4 w-4 mr-2" />
+                {t('learn.button')}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -119,6 +129,12 @@ export function NotebookHeader({ notebook }: NotebookHeaderProps) {
         </div>
       </div>
 
+      <LearnDialog
+        open={showLearnDialog}
+        onOpenChange={setShowLearnDialog}
+        notebookId={notebook.id}
+        notebookName={notebook.name}
+      />
       <NotebookDeleteDialog
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}

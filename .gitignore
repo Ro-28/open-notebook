@@ -154,3 +154,6 @@ docker-compose.override.yml
 # Local QA/debug artifacts
 screenshot-*.png
 history.txt
+
+# OpenMAIC sidecar (Learn feature) local config
+vendor/openmaic/.env

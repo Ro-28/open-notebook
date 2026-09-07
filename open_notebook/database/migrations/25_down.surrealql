@@ -1,0 +1,3 @@
+-- Rollback Migration 25: remove learning sessions
+REMOVE INDEX IF EXISTS idx_learning_session_notebook ON TABLE learning_session;
+REMOVE TABLE IF EXISTS learning_session;
