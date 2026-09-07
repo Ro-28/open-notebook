@@ -3,6 +3,7 @@ import apiClient from './client'
 export interface LearningSession {
   id: string
   notebook_id: string
+  notebook_name?: string | null
   title: string
   requirement: string
   status: 'pending' | 'running' | 'succeeded' | 'failed'
@@ -47,6 +48,11 @@ export interface LearningStatus {
 export const learnApi = {
   status: async () => {
     const response = await apiClient.get<LearningStatus>('/learn/status')
+    return response.data
+  },
+
+  listAll: async () => {
+    const response = await apiClient.get<LearningSession[]>('/learn')
     return response.data
   },
 

@@ -214,6 +214,7 @@ export const deDE = {
     connectErrorHint: "Keine Verbindung zum Server möglich. Bitte prüfe, ob die API läuft.",
   },
   navigation: {
+    learn: "Lernen",
     collect: "Sammeln",
     process: "Verarbeiten",
     create: "Erstellen",
@@ -998,6 +999,10 @@ export const deDE = {
     viewDocs: "Dokumentation anzeigen",
   },
   learn: {
+    pageTitle: "Lernen",
+    pageDesc: "Interaktive KI-Klassenzimmer aus deinen Notizbüchern – Folien, KI-Lehrer und Quiz.",
+    pageEmpty: "Noch keine Klassenzimmer. Wähle oben ein Notizbuch und erzeuge das erste.",
+    pickNotebook: "Notizbuch wählen…",
     button: "Lernen",
     title: "Lernen",
     description: "Verwandle dieses Notizbuch in ein interaktives KI-Klassenzimmer mit Folien, KI-Lehrer und Quiz (powered by OpenMAIC).",

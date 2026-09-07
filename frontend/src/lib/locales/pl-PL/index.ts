@@ -211,6 +211,7 @@ export const plPL = {
     connectErrorHint: "Nie można połączyć się z serwerem. Sprawdź, czy API jest uruchomione.",
   },
   navigation: {
+    learn: "Ucz się",
     collect: "Zbieraj",
     process: "Przetwarzaj",
     create: "Twórz",
@@ -995,6 +996,10 @@ export const plPL = {
     viewDocs: "Zobacz dokumentację",
   },
   learn: {
+    pageTitle: "Ucz się",
+    pageDesc: "Interaktywne klasy AI generowane z Twoich notatników — slajdy, nauczyciel AI i quizy.",
+    pageEmpty: "Brak klas. Wybierz notatnik powyżej i wygeneruj pierwszą.",
+    pickNotebook: "Wybierz notatnik…",
     button: "Ucz się",
     title: "Ucz się",
     description: "Zamień ten notatnik w interaktywną klasę AI ze slajdami, nauczycielem AI i quizem (OpenMAIC).",

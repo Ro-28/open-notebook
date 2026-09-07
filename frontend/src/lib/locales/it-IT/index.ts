@@ -211,6 +211,7 @@ export const itIT = {
     connectErrorHint: "Impossibile connettersi al server. Verifica che l'API sia in esecuzione.",
   },
   navigation: {
+    learn: "Impara",
     collect: "Raccogli",
     process: "Elabora",
     create: "Crea",
@@ -995,6 +996,10 @@ export const itIT = {
     viewDocs: "Vedi documentazione",
   },
   learn: {
+    pageTitle: "Impara",
+    pageDesc: "Aule interattive con IA generate dai tuoi quaderni: slide, insegnante IA e quiz.",
+    pageEmpty: "Nessuna aula ancora. Scegli un quaderno qui sopra e genera la prima.",
+    pickNotebook: "Scegli un quaderno…",
     button: "Impara",
     title: "Impara",
     description: "Trasforma questo quaderno in un'aula interattiva con IA: slide, insegnante IA e quiz (con OpenMAIC).",

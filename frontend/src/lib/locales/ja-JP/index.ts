@@ -211,6 +211,7 @@ export const jaJP = {
     connectErrorHint: "サーバーに接続できません。APIが起動しているか確認してください。",
   },
   navigation: {
+    learn: "学ぶ",
     collect: "収集",
     process: "処理",
     create: "作成",
@@ -995,6 +996,10 @@ export const jaJP = {
     viewDocs: "ドキュメントを見る",
   },
   learn: {
+    pageTitle: "学ぶ",
+    pageDesc: "ノートブックから生成されたインタラクティブなAI教室 — スライド、AI教師、クイズ。",
+    pageEmpty: "まだ教室がありません。上でノートブックを選んで最初の教室を生成してください。",
+    pickNotebook: "ノートブックを選択…",
     button: "学ぶ",
     title: "学ぶ",
     description: "このノートブックをスライド・AI教師・クイズ付きのインタラクティブなAI教室に変換します（OpenMAIC）。",

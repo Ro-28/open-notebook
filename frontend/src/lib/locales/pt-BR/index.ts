@@ -211,6 +211,7 @@ export const ptBR = {
     connectErrorHint: "Não foi possível conectar ao servidor. Verifique se a API está rodando.",
   },
   navigation: {
+    learn: "Aprender",
     collect: "Coletar",
     process: "Processar",
     create: "Criar",
@@ -995,6 +996,10 @@ export const ptBR = {
     viewDocs: "Ver documentação",
   },
   learn: {
+    pageTitle: "Aprender",
+    pageDesc: "Salas de aula interativas com IA geradas a partir dos seus cadernos: slides, professor IA e quizzes.",
+    pageEmpty: "Nenhuma sala de aula ainda. Escolha um caderno acima e gere a primeira.",
+    pickNotebook: "Escolha um caderno…",
     button: "Aprender",
     title: "Aprender",
     description: "Transforme este caderno em uma sala de aula interativa com IA: slides, professor IA e quiz (com OpenMAIC).",

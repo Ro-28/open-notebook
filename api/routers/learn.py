@@ -1,6 +1,6 @@
 """Learn feature: generate interactive OpenMAIC classrooms from a notebook."""
 
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Query
 
@@ -15,10 +15,11 @@ from open_notebook.domain.learning import LearningSession
 router = APIRouter()
 
 
-def _to_response(s: LearningSession) -> LearningSessionResponse:
+def _to_response(s: LearningSession, notebook_name: Optional[str] = None) -> LearningSessionResponse:
     return LearningSessionResponse(
         id=str(s.id),
         notebook_id=s.notebook_id,
+        notebook_name=notebook_name,
         title=s.title,
         requirement=s.requirement,
         status=s.status,
@@ -40,6 +41,14 @@ def _to_response(s: LearningSession) -> LearningSessionResponse:
 async def learn_status():
     """Whether the OpenMAIC sidecar is reachable."""
     return LearningStatusResponse(**await learning_service.openmaic_health())
+
+
+@router.get("/learn", response_model=List[LearningSessionResponse])
+async def list_all_sessions(refresh: bool = Query(True, description="Poll running jobs")):
+    """All classrooms across notebooks, newest first."""
+    sessions = await learning_service.list_all_learning_sessions(refresh=refresh)
+    names = await learning_service.notebook_names({s.notebook_id for s in sessions})
+    return [_to_response(s, names.get(s.notebook_id)) for s in sessions]
 
 
 @router.get(

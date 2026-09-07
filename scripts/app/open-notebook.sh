@@ -189,7 +189,10 @@ start_openmaic() {
       echo "ANTHROPIC_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
       [ -z "$default_model" ] && default_model="openrouter:gpt-5.5"
       echo
-      echo "DEFAULT_MODEL=$default_model"
+      echo "# Default: Claude Haiku on the subscription (fast, cheap). Alternatives: anthropic:claude-sonnet-5,"
+      echo "# openrouter:gpt-5.5 (ChatGPT), openai:gpt-oss:120b (Ollama Cloud). Per-stage: MODEL_ROUTES."
+      echo "DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001"
+      echo "# Previous auto-pick: $default_model"
       echo "# Let Open Notebook embed classrooms in its Learn dialog"
       echo "ALLOWED_FRAME_ANCESTORS=$UI_URL"
     } >"$MAIC_DIR/.env"

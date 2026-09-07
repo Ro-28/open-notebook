@@ -211,6 +211,7 @@ export const esES = {
     connectErrorHint: "No se puede conectar al servidor. Por favor, verifica si la API está funcionando.",
   },
   navigation: {
+    learn: "Aprender",
     collect: "Recopilar",
     process: "Procesar",
     create: "Crear",
@@ -996,6 +997,10 @@ export const esES = {
     viewDocs: "Ver documentación",
   },
   learn: {
+    pageTitle: "Aprender",
+    pageDesc: "Aulas interactivas con IA generadas a partir de tus cuadernos: diapositivas, profesor IA y cuestionarios.",
+    pageEmpty: "Aún no hay aulas. Elige un cuaderno arriba y genera la primera.",
+    pickNotebook: "Elige un cuaderno…",
     button: "Aprender",
     title: "Aprender",
     description: "Convierte este cuaderno en un aula interactiva con IA: diapositivas, profesor IA y cuestionario (con OpenMAIC).",

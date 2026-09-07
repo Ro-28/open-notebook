@@ -211,6 +211,7 @@ export const frFR = {
     connectErrorHint: "Impossible de se connecter au serveur. Veuillez vérifier si l'API est lancée.",
   },
   navigation: {
+    learn: "Apprendre",
     collect: "Collecter",
     process: "Traiter",
     create: "Créer",
@@ -995,6 +996,10 @@ export const frFR = {
     viewDocs: "Voir la documentation",
   },
   learn: {
+    pageTitle: "Apprendre",
+    pageDesc: "Classes interactives avec IA générées à partir de vos carnets : diapositives, professeur IA et quiz.",
+    pageEmpty: "Aucune classe pour l'instant. Choisissez un carnet ci-dessus et générez la première.",
+    pickNotebook: "Choisir un carnet…",
     button: "Apprendre",
     title: "Apprendre",
     description: "Transformez ce carnet en salle de classe interactive avec IA : diapositives, professeur IA et quiz (propulsé par OpenMAIC).",

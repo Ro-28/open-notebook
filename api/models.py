@@ -842,6 +842,7 @@ class LearningSessionCreate(BaseModel):
 class LearningSessionResponse(BaseModel):
     id: str
     notebook_id: str
+    notebook_name: Optional[str] = None
     title: str
     requirement: str
     status: str

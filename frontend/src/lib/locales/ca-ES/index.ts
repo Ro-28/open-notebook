@@ -211,6 +211,7 @@ export const caES = {
     connectErrorHint: "No es pot connectar al servidor. Comprova si l'API s'està executant.",
   },
   navigation: {
+    learn: "Aprèn",
     collect: "Recull",
     process: "Processa",
     create: "Crea",
@@ -995,6 +996,10 @@ export const caES = {
     viewDocs: "Visualitza la documentació",
   },
   learn: {
+    pageTitle: "Aprèn",
+    pageDesc: "Aules interactives amb IA generades a partir dels teus quaderns: diapositives, professor IA i qüestionaris.",
+    pageEmpty: "Encara no hi ha aules. Tria un quadern a dalt i genera la primera.",
+    pickNotebook: "Tria un quadern…",
     button: "Aprèn",
     title: "Aprèn",
     description: "Converteix aquest quadern en una aula interactiva amb IA: diapositives, professor IA i qüestionari (amb OpenMAIC).",

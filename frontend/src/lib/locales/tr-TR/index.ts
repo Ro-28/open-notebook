@@ -211,6 +211,7 @@ export const trTR = {
     connectErrorHint: "Sunucuya bağlanılamıyor. API'nin çalışıp çalışmadığını kontrol edin.",
   },
   navigation: {
+    learn: "Öğren",
     collect: "Topla",
     process: "İşle",
     create: "Oluştur",
@@ -995,6 +996,10 @@ export const trTR = {
     viewDocs: "Belgeleri Görüntüle",
   },
   learn: {
+    pageTitle: "Öğren",
+    pageDesc: "Not defterlerinizden oluşturulan etkileşimli yapay zekâ sınıfları: slaytlar, yapay zekâ öğretmen ve sınavlar.",
+    pageEmpty: "Henüz sınıf yok. Yukarıdan bir not defteri seçip ilkini oluşturun.",
+    pickNotebook: "Not defteri seçin…",
     button: "Öğren",
     title: "Öğren",
     description: "Bu not defterini slaytlar, yapay zekâ öğretmen ve sınav içeren etkileşimli bir sınıfa dönüştürün (OpenMAIC ile).",

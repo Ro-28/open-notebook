@@ -211,6 +211,7 @@ export const zhTW = {
     connectErrorHint: "無法連線至伺服器。請檢查 API 是否正在運行。",
   },
   navigation: {
+    learn: "學習",
     collect: "採集",
     process: "處理",
     create: "創作",
@@ -995,6 +996,10 @@ export const zhTW = {
     viewDocs: "查看文件",
   },
   learn: {
+    pageTitle: "學習",
+    pageDesc: "由你的筆記本產生的互動 AI 課堂——投影片、AI 教師與測驗。",
+    pageEmpty: "還沒有課堂。在上方選擇一個筆記本並產生第一個。",
+    pickNotebook: "選擇筆記本…",
     button: "學習",
     title: "學習",
     description: "將此筆記本變成含有投影片、AI 教師與測驗的互動 AI 課堂（由 OpenMAIC 驅動）。",

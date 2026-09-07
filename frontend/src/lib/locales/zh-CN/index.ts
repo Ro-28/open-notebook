@@ -211,6 +211,7 @@ export const zhCN = {
     connectErrorHint: "无法连接到服务器。请检查 API 是否正在运行。",
   },
   navigation: {
+    learn: "学习",
     collect: "采集",
     process: "处理",
     create: "创作",
@@ -995,6 +996,10 @@ export const zhCN = {
     viewDocs: "查看文档",
   },
   learn: {
+    pageTitle: "学习",
+    pageDesc: "由你的笔记本生成的互动 AI 课堂——幻灯片、AI 教师和测验。",
+    pageEmpty: "还没有课堂。在上方选择一个笔记本并生成第一个。",
+    pickNotebook: "选择笔记本…",
     button: "学习",
     title: "学习",
     description: "将此笔记本变成带有幻灯片、AI 教师和测验的互动 AI 课堂（由 OpenMAIC 驱动）。",

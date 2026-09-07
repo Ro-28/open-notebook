@@ -249,6 +249,27 @@ async def list_learning_sessions(notebook_id: str, refresh: bool = True) -> List
     return sessions
 
 
+async def list_all_learning_sessions(refresh: bool = True) -> List[LearningSession]:
+    sessions = await LearningSession.all_recent()
+    if refresh:
+        running = [s for s in sessions if s.status in ("pending", "running") and s.job_id]
+        if running:
+            await asyncio.gather(*(refresh_learning_session(s) for s in running))
+    return sessions
+
+
+async def notebook_names(notebook_ids) -> Dict[str, str]:
+    ids = [i for i in notebook_ids if i]
+    if not ids:
+        return {}
+    from open_notebook.database.repository import ensure_record_id, repo_query
+
+    rows = await repo_query(
+        "SELECT id, name FROM notebook WHERE id IN $ids", {"ids": [ensure_record_id(i) for i in ids]}
+    )
+    return {str(r["id"]): r["name"] for r in rows or []}
+
+
 async def get_learning_session(session_id: str, refresh: bool = True) -> LearningSession:
     session = await LearningSession.get(session_id)
     if not session:

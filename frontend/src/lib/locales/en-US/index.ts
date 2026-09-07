@@ -209,6 +209,7 @@ export const enUS = {
     connectErrorHint: "Unable to connect to server. Please check if the API is running.",
   },
   navigation: {
+    learn: "Learn",
     collect: "Collect",
     process: "Process",
     create: "Create",
@@ -994,6 +995,10 @@ export const enUS = {
     viewDocs: "View docs",
   },
   learn: {
+    pageTitle: "Learn",
+    pageDesc: "Interactive AI classrooms generated from your notebooks — slides, an AI teacher, and quizzes.",
+    pageEmpty: "No classrooms yet. Pick a notebook above and generate your first one.",
+    pickNotebook: "Choose a notebook…",
     button: "Learn",
     title: "Learn",
     description: "Turn this notebook into an interactive AI classroom with slides, an AI teacher, and a quiz (powered by OpenMAIC).",

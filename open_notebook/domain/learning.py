@@ -45,6 +45,13 @@ class LearningSession(ObjectModel):
         return data
 
     @classmethod
+    async def all_recent(cls, limit: int = 100) -> List["LearningSession"]:
+        rows = await repo_query(
+            "SELECT * FROM learning_session ORDER BY created DESC LIMIT $limit", {"limit": limit}
+        )
+        return [cls(**row) for row in rows] if rows else []
+
+    @classmethod
     async def for_notebook(cls, notebook_id: str) -> List["LearningSession"]:
         rows = await repo_query(
             "SELECT * FROM learning_session WHERE notebook = $nb ORDER BY created DESC",

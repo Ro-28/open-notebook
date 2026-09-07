@@ -40,8 +40,7 @@ import {
   FileText,
   Plus,
   Wrench,
-  Command,
-} from 'lucide-react'
+  Command, GraduationCap } from 'lucide-react'
 
 const getNavigation = (t: TFunction) => [
   {
@@ -61,6 +60,7 @@ const getNavigation = (t: TFunction) => [
     title: t('navigation.create'),
     items: [
       { name: t('navigation.podcasts'), href: '/podcasts', icon: Mic, iconClass: 'text-mauve' },
+      { name: t('navigation.learn'), href: '/learn', icon: GraduationCap, iconClass: 'text-fern' },
     ],
   },
   {

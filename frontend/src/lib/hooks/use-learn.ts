@@ -7,6 +7,7 @@ import { getApiErrorKey } from '@/lib/utils/error-handler'
 export const LEARN_KEYS = {
   status: ['learn', 'status'] as const,
   sessions: (notebookId: string) => ['learn', 'sessions', notebookId] as const,
+  all: ['learn', 'sessions'] as const,
 }
 
 function hasActive(sessions?: LearningSession[]) {
@@ -19,6 +20,14 @@ export function useLearnStatus() {
     queryFn: learnApi.status,
     staleTime: 60_000,
     retry: false,
+  })
+}
+
+export function useAllLearningSessions() {
+  return useQuery({
+    queryKey: LEARN_KEYS.all,
+    queryFn: learnApi.listAll,
+    refetchInterval: (query) => (hasActive(query.state.data) ? 5_000 : false),
   })
 }
 
@@ -40,7 +49,7 @@ export function useCreateLearningSession(notebookId: string) {
   return useMutation({
     mutationFn: (data: LearningSessionCreate) => learnApi.create(notebookId, data),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: LEARN_KEYS.sessions(notebookId) })
+      await queryClient.invalidateQueries({ queryKey: LEARN_KEYS.all })
       toast({ title: t('learn.generationStarted'), description: t('learn.generationStartedDesc') })
     },
     onError: (error: unknown) => {
@@ -61,7 +70,7 @@ export function useDeleteLearningSession(notebookId: string) {
   return useMutation({
     mutationFn: (sessionId: string) => learnApi.delete(sessionId),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: LEARN_KEYS.sessions(notebookId) })
+      await queryClient.invalidateQueries({ queryKey: LEARN_KEYS.all })
       toast({ title: t('learn.deleted') })
     },
     onError: (error: unknown) => {
