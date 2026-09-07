@@ -27,8 +27,8 @@ end run
 on idle
 	-- If the services were stopped from the web UI, exit quietly.
 	try
-		set st to ctl("status")
-		if st contains "api: stopped" then
+		set statusText to ctl("status")
+		if statusText contains "api: stopped" then
 			set stopping to true
 			quit
 		end if
