@@ -1005,6 +1005,18 @@ export const trTR = {
     viewDocs: "Belgeleri Görüntüle",
   },
   learn: {
+    chat: {
+      askTeacher: "Öğretmene sor",
+      title: "Öğretmene sor",
+      intro: "Bu dersle ilgili her şeyi sorabilirsin. Öğretmen slaytları bilir ve not defterine bakabilir.",
+      placeholder: "Bu slayt hakkında sor…",
+      send: "Gönder",
+      error: "Öğretmen yanıt veremedi.",
+      empty: "(yanıt yok)",
+      suggestExplain: "Bu slaydı basitçe açıkla",
+      suggestExample: "Somut bir örnek ver",
+      suggestQuiz: "Beni bu konuda sına",
+    },
     learnThis: "Bunu öğren",
     learnThisDesc: "Seçili not defterlerinden bu soruyu yanıtlayan etkileşimli bir sınıf oluştur",
     fromQuestionStartedDesc: "Sorunuzdan bir sınıf oluşturuluyor. Öğren sayfasından takip edin.",

@@ -1005,6 +1005,18 @@ export const jaJP = {
     viewDocs: "ドキュメントを見る",
   },
   learn: {
+    chat: {
+      askTeacher: "先生に質問",
+      title: "先生に質問",
+      intro: "このレッスンについて何でも質問できます。先生はスライドを把握しており、ノートブックを調べることもできます。",
+      placeholder: "このスライドについて質問…",
+      send: "送信",
+      error: "先生が回答できませんでした。",
+      empty: "（回答なし）",
+      suggestExplain: "このスライドをやさしく説明して",
+      suggestExample: "具体例を挙げて",
+      suggestQuiz: "この内容でクイズを出して",
+    },
     learnThis: "これを学ぶ",
     learnThisDesc: "選択したノートブックからこの質問に答えるインタラクティブな教室を生成します",
     fromQuestionStartedDesc: "質問から教室を作成しています。「学ぶ」ページで確認できます。",

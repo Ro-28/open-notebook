@@ -45,6 +45,7 @@ export function ClassroomView({ session, className }: { session: LearningSession
       ) : (
         <ClassroomPlayer
           doc={doc.data}
+          sessionId={session.id}
           externalUrl={session.classroom_url}
           className="flex-1 min-h-0"
           initialSceneIndex={session.learner?.scene_index ?? 0}

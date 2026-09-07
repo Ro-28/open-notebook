@@ -1005,6 +1005,18 @@ export const ptBR = {
     viewDocs: "Ver documentação",
   },
   learn: {
+    chat: {
+      askTeacher: "Perguntar ao professor",
+      title: "Perguntar ao professor",
+      intro: "Pergunte qualquer coisa sobre esta aula. O professor conhece os slides e pode consultar seu notebook.",
+      placeholder: "Pergunte sobre este slide…",
+      send: "Enviar",
+      error: "O professor não conseguiu responder.",
+      empty: "(sem resposta)",
+      suggestExplain: "Explique este slide de forma simples",
+      suggestExample: "Me dê um exemplo concreto",
+      suggestQuiz: "Me teste sobre isso",
+    },
     learnThis: "Aprender isto",
     learnThisDesc: "Gere uma sala de aula interativa que responda a esta pergunta a partir dos cadernos selecionados",
     fromQuestionStartedDesc: "Criando uma sala de aula a partir da sua pergunta. Acompanhe na página Aprender.",

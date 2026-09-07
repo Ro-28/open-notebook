@@ -1005,6 +1005,18 @@ export const caES = {
     viewDocs: "Visualitza la documentació",
   },
   learn: {
+    chat: {
+      askTeacher: "Pregunta al professor",
+      title: "Pregunta al professor",
+      intro: "Pregunta el que vulguis sobre aquesta lliçó. El professor coneix les diapositives i pot consultar el teu quadern.",
+      placeholder: "Pregunta sobre aquesta diapositiva…",
+      send: "Envia",
+      error: "El professor no ha pogut respondre.",
+      empty: "(sense resposta)",
+      suggestExplain: "Explica aquesta diapositiva de manera senzilla",
+      suggestExample: "Dona'm un exemple concret",
+      suggestQuiz: "Posa'm a prova sobre això",
+    },
     learnThis: "Aprèn això",
     learnThisDesc: "Genera una aula interactiva que respongui aquesta pregunta a partir dels quaderns seleccionats",
     fromQuestionStartedDesc: "S'està creant una aula a partir de la teva pregunta. Segueix-la a la pàgina Aprèn.",

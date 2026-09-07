@@ -1005,6 +1005,18 @@ export const itIT = {
     viewDocs: "Vedi documentazione",
   },
   learn: {
+    chat: {
+      askTeacher: "Chiedi all'insegnante",
+      title: "Chiedi all'insegnante",
+      intro: "Chiedi qualsiasi cosa su questa lezione. L'insegnante conosce le slide e può consultare il tuo notebook.",
+      placeholder: "Chiedi su questa slide…",
+      send: "Invia",
+      error: "L'insegnante non ha potuto rispondere.",
+      empty: "(nessuna risposta)",
+      suggestExplain: "Spiega questa slide in modo semplice",
+      suggestExample: "Fammi un esempio concreto",
+      suggestQuiz: "Interrogami su questo",
+    },
     learnThis: "Impara questo",
     learnThisDesc: "Genera un'aula interattiva che risponda a questa domanda dai quaderni selezionati",
     fromQuestionStartedDesc: "Creazione dell'aula dalla tua domanda. Seguila nella pagina Impara.",

@@ -126,6 +126,74 @@ async def test_searxng_shape_scopes_and_falls_back_to_text():
 
 
 @pytest.mark.asyncio
+async def test_chat_relay_adds_notebook_context_and_streams(monkeypatch):
+    """The teacher chat relay retrieves notebook passages onto the last user message and
+    forwards the SSE body from the sidecar unchanged."""
+    from types import SimpleNamespace
+
+    from api import learning_service as svc
+
+    session = SimpleNamespace(id="learning_session:1", notebook_id="notebook:1", scope_notebooks=None)
+
+    async def fake_get(session_id, refresh=True):
+        return session
+
+    async def fake_doc(session_id):
+        return {"stage": {"id": "s"}, "scenes": [{"id": "scene-1", "order": 0}]}
+
+    async def fake_search(query, limit=5, notebook_id=None):
+        assert "[nb:notebook:1]" in query
+        return {"results": [{"title": "mito.txt (source)", "content": "ATP synthase makes ATP."}]}
+
+    captured = {}
+
+    class FakeResp:
+        status_code = 200
+
+        async def aiter_bytes(self):
+            yield b'data: {"type":"text_delta","data":{"content":"hi"}}\n\n'
+
+        async def aread(self):
+            return b""
+
+    class FakeStream:
+        def __init__(self, method, url, json=None, headers=None):
+            captured["payload"] = json
+
+        async def __aenter__(self):
+            return FakeResp()
+
+        async def __aexit__(self, *a):
+            return False
+
+    class FakeClient:
+        def __init__(self, *a, **k):
+            pass
+
+        def stream(self, *a, **k):
+            return FakeStream(*a, **k)
+
+        async def aclose(self):
+            pass
+
+    monkeypatch.setattr(svc, "get_learning_session", fake_get)
+    monkeypatch.setattr(svc, "get_classroom_document", fake_doc)
+    monkeypatch.setattr(svc, "notebook_search_as_searxng", fake_search)
+    monkeypatch.setattr(svc.httpx, "AsyncClient", FakeClient)
+
+    body = {"messages": [{"id": "m1", "role": "user", "parts": [{"type": "text", "text": "What makes ATP?"}]}]}
+    chunks = [c async for c in svc.stream_classroom_chat("learning_session:1", body)]
+
+    assert b"text_delta" in b"".join(chunks)
+    sent = captured["payload"]
+    text = sent["messages"][-1]["parts"][0]["text"]
+    assert text.startswith("What makes ATP?")
+    assert "<notebook_context>" in text and "[mito.txt (source)]" in text
+    assert sent["storeState"]["currentSceneId"] == "scene-1"
+    assert sent["config"]["agentIds"] == ["default-1"]
+
+
+@pytest.mark.asyncio
 async def test_progress_merges_and_spaces_reviews():
     session = LearningSession(id="learning_session:1", notebook="notebook:n", title="t", requirement="r", status="succeeded")
 

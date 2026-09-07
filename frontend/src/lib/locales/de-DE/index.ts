@@ -1008,6 +1008,18 @@ export const deDE = {
     viewDocs: "Dokumentation anzeigen",
   },
   learn: {
+    chat: {
+      askTeacher: "Lehrer fragen",
+      title: "Lehrer fragen",
+      intro: "Frag alles zu dieser Lektion. Der Lehrer kennt die Folien und kann in deinem Notebook nachschlagen.",
+      placeholder: "Frage zu dieser Folie…",
+      send: "Senden",
+      error: "Der Lehrer konnte nicht antworten.",
+      empty: "(keine Antwort)",
+      suggestExplain: "Erkläre diese Folie einfach",
+      suggestExample: "Gib mir ein konkretes Beispiel",
+      suggestQuiz: "Frag mich dazu ab",
+    },
     learnThis: "Das lernen",
     learnThisDesc: "Ein interaktives Klassenzimmer erzeugen, das diese Frage aus den gewählten Notizbüchern beantwortet",
     fromQuestionStartedDesc: "Klassenzimmer aus deiner Frage wird erzeugt. Verfolge es auf der Lernen-Seite.",

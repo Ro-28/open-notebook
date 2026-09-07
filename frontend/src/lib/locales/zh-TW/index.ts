@@ -1005,6 +1005,18 @@ export const zhTW = {
     viewDocs: "查看文件",
   },
   learn: {
+    chat: {
+      askTeacher: "問老師",
+      title: "問老師",
+      intro: "關於本課可以隨時提問。老師了解投影片內容，並能查閱你的筆記本。",
+      placeholder: "就這張投影片提問…",
+      send: "傳送",
+      error: "老師無法回答。",
+      empty: "（無回答）",
+      suggestExplain: "簡單解釋這張投影片",
+      suggestExample: "給我一個具體例子",
+      suggestQuiz: "就這個內容考考我",
+    },
     learnThis: "學習這個",
     learnThisDesc: "根據所選筆記本產生一個回答此問題的互動課堂",
     fromQuestionStartedDesc: "正在根據你的問題建立課堂。可在「學習」頁面查看進度。",

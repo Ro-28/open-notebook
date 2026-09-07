@@ -1006,6 +1006,18 @@ export const esES = {
     viewDocs: "Ver documentación",
   },
   learn: {
+    chat: {
+      askTeacher: "Preguntar al profesor",
+      title: "Preguntar al profesor",
+      intro: "Pregunta lo que quieras sobre esta lección. El profesor conoce las diapositivas y puede consultar tu cuaderno.",
+      placeholder: "Pregunta sobre esta diapositiva…",
+      send: "Enviar",
+      error: "El profesor no pudo responder.",
+      empty: "(sin respuesta)",
+      suggestExplain: "Explica esta diapositiva de forma sencilla",
+      suggestExample: "Dame un ejemplo concreto",
+      suggestQuiz: "Ponme a prueba sobre esto",
+    },
     learnThis: "Aprender esto",
     learnThisDesc: "Genera un aula interactiva que responda esta pregunta a partir de los cuadernos seleccionados",
     fromQuestionStartedDesc: "Creando un aula a partir de tu pregunta. Síguela en la página Aprender.",

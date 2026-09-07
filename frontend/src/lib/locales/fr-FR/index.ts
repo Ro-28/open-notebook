@@ -1005,6 +1005,18 @@ export const frFR = {
     viewDocs: "Voir la documentation",
   },
   learn: {
+    chat: {
+      askTeacher: "Demander au professeur",
+      title: "Demander au professeur",
+      intro: "Posez vos questions sur cette leçon. Le professeur connaît les diapositives et peut consulter votre carnet.",
+      placeholder: "Question sur cette diapositive…",
+      send: "Envoyer",
+      error: "Le professeur n'a pas pu répondre.",
+      empty: "(pas de réponse)",
+      suggestExplain: "Explique cette diapositive simplement",
+      suggestExample: "Donne-moi un exemple concret",
+      suggestQuiz: "Interroge-moi là-dessus",
+    },
     learnThis: "Apprendre ceci",
     learnThisDesc: "Générer une classe interactive qui répond à cette question à partir des carnets sélectionnés",
     fromQuestionStartedDesc: "Création d'une classe à partir de votre question. Suivez-la sur la page Apprendre.",

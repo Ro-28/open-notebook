@@ -1005,6 +1005,18 @@ export const zhCN = {
     viewDocs: "查看文档",
   },
   learn: {
+    chat: {
+      askTeacher: "问老师",
+      title: "问老师",
+      intro: "关于本课可以随时提问。老师了解幻灯片内容，并能查阅你的笔记本。",
+      placeholder: "就这张幻灯片提问…",
+      send: "发送",
+      error: "老师无法回答。",
+      empty: "（无回答）",
+      suggestExplain: "简单解释这张幻灯片",
+      suggestExample: "给我一个具体例子",
+      suggestQuiz: "就这个内容考考我",
+    },
     learnThis: "学习这个",
     learnThisDesc: "根据所选笔记本生成一个回答此问题的互动课堂",
     fromQuestionStartedDesc: "正在根据你的问题创建课堂。可在“学习”页面查看进度。",

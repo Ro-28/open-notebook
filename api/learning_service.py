@@ -521,6 +521,80 @@ async def get_classroom_document(session_id: str) -> Dict[str, Any]:
     return json.loads(text)
 
 
+async def stream_classroom_chat(session_id: str, body: Dict[str, Any]):
+    """Relay a classroom Q&A turn to OpenMAIC's stateless `/api/chat` (SSE) for the native player.
+
+    The browser keeps the conversation; we add the classroom document (stage + scenes) as
+    `storeState`, the default AI-teacher agent, and live retrieval from the session's notebooks
+    as the agent's web-search backend. Yields raw SSE bytes.
+    """
+    session = await get_learning_session(session_id, refresh=False)
+    doc = await get_classroom_document(session_id)
+    scenes = doc.get("scenes") or []
+    current = body.get("current_scene_id") or (scenes[0]["id"] if scenes else None)
+    messages = body.get("messages") or []
+    if not messages:
+        raise InvalidInputError("messages is required")
+
+    scope = (
+        [str(n) for n in session.scope_notebooks]
+        if session.scope_notebooks
+        else ([session.notebook_id] if session.notebook_id else [])
+    )
+    # OpenMAIC's chat runtime has no search tool (its SearXNG hook is generation-only), so we
+    # retrieve here: top notebook passages for the question ride along as context on the last
+    # user message. The teacher is told to prefer them and cite by title.
+    last = messages[-1]
+    if isinstance(last, dict) and last.get("role") == "user":
+        parts = last.get("parts") or []
+        text_part = next((p for p in parts if isinstance(p, dict) and p.get("type") == "text" and p.get("text")), None)
+        if text_part:
+            question = str(text_part["text"])
+            hits = await notebook_search_as_searxng(f"{question} {' '.join(scope_tag(n) for n in scope)}", limit=5)
+            passages = [
+                f"[{h['title']}]\n{h['content'][:1200]}" for h in hits.get("results", []) if h.get("content")
+            ]
+            if passages:
+                text_part["text"] = (
+                    f"{question}\n\n"
+                    "<notebook_context>\n"
+                    "Relevant passages retrieved from the learner's notebook (prefer these over guesses; "
+                    "cite the bracketed title when you use one):\n\n" + "\n\n".join(passages) + "\n</notebook_context>"
+                )
+
+    payload: Dict[str, Any] = {
+        "messages": messages,
+        "storeState": {
+            "stage": doc.get("stage"),
+            "scenes": scenes,
+            "currentSceneId": current,
+            "mode": body.get("mode") or "classroom",
+            "whiteboardOpen": False,
+            **({"quizResults": body["quiz_results"]} if body.get("quiz_results") else {}),
+        },
+        "config": {"agentIds": ["default-1"], "sessionType": "qa", "piMaxAgentTurns": 1},
+        "webSearchProviderId": "searxng",
+    }
+    if body.get("user_profile"):
+        payload["userProfile"] = body["user_profile"]
+
+    client = httpx.AsyncClient(timeout=httpx.Timeout(120.0, read=600.0))
+    try:
+        async with client.stream(
+            "POST", f"{openmaic_url()}/api/chat", json=payload, headers={**_headers(), "Accept": "text/event-stream"}
+        ) as r:
+            if r.status_code >= 400:
+                text = (await r.aread()).decode(errors="replace")[:500]
+                yield f'data: {json.dumps({"type": "error", "data": {"message": f"OpenMAIC {r.status_code}: {text}"}})}\n\n'.encode()
+                return
+            async for chunk in r.aiter_bytes():
+                yield chunk
+    except httpx.HTTPError as e:
+        yield f'data: {json.dumps({"type": "error", "data": {"message": f"OpenMAIC unreachable: {e}"}})}\n\n'.encode()
+    finally:
+        await client.aclose()
+
+
 REVIEW_INTERVALS_DAYS = [1, 3, 7, 14, 30]
 
 

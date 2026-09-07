@@ -1005,6 +1005,18 @@ export const plPL = {
     viewDocs: "Zobacz dokumentację",
   },
   learn: {
+    chat: {
+      askTeacher: "Zapytaj nauczyciela",
+      title: "Zapytaj nauczyciela",
+      intro: "Zapytaj o cokolwiek z tej lekcji. Nauczyciel zna slajdy i może sprawdzić informacje w Twoim notatniku.",
+      placeholder: "Zapytaj o ten slajd…",
+      send: "Wyślij",
+      error: "Nauczyciel nie mógł odpowiedzieć.",
+      empty: "(brak odpowiedzi)",
+      suggestExplain: "Wyjaśnij ten slajd prosto",
+      suggestExample: "Podaj konkretny przykład",
+      suggestQuiz: "Przepytaj mnie z tego",
+    },
     learnThis: "Naucz się tego",
     learnThisDesc: "Wygeneruj interaktywną klasę odpowiadającą na to pytanie z wybranych notatników",
     fromQuestionStartedDesc: "Tworzenie klasy z Twojego pytania. Śledź postęp na stronie Ucz się.",

@@ -1,8 +1,9 @@
 """Learn feature: generate interactive OpenMAIC classrooms from a notebook."""
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Query
+from fastapi.responses import StreamingResponse
 
 from api import learning_service
 from api.models import (
@@ -124,6 +125,17 @@ async def learn_reference(record_id: str):
 async def get_classroom(session_id: str):
     """Classroom document (stage + scenes) for the in-app renderer."""
     return await learning_service.get_classroom_document(session_id)
+
+
+@router.post("/learn/{session_id}/chat")
+async def classroom_chat(session_id: str, body: Dict[str, Any]):
+    """Ask the AI teacher (SSE). Body: {messages: UIMessage[], current_scene_id?, quiz_results?}.
+    Relays OpenMAIC's stateless chat with the classroom as context and notebook-scoped retrieval."""
+    return StreamingResponse(
+        learning_service.stream_classroom_chat(session_id, body),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.patch("/learn/{session_id}/progress", response_model=LearningSessionResponse)

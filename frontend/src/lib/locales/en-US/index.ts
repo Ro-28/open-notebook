@@ -1004,6 +1004,18 @@ export const enUS = {
     viewDocs: "View docs",
   },
   learn: {
+    chat: {
+      askTeacher: "Ask the teacher",
+      title: "Ask the teacher",
+      intro: "Ask anything about this lesson. The teacher knows the slides and can look things up in your notebook.",
+      placeholder: "Ask about this slide…",
+      send: "Send",
+      error: "The teacher could not answer.",
+      empty: "(no answer)",
+      suggestExplain: "Explain this slide simply",
+      suggestExample: "Give me a concrete example",
+      suggestQuiz: "Quiz me on this",
+    },
     learnThis: "Learn this",
     learnThisDesc: "Generate an interactive classroom that answers this question from the selected notebooks",
     fromQuestionStartedDesc: "Building a classroom from your question. Track it on the Learn page.",

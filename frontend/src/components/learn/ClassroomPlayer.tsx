@@ -11,11 +11,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SlideCanvas, type SlideEffects } from '@openmaic/renderer'
 import type { Action, Scene, Slide, QuizQuestion } from '@openmaic/dsl'
-import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, GraduationCap, CheckCircle2, XCircle, Volume2, VolumeX } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ExternalLink, Pause, Play, GraduationCap, CheckCircle2, XCircle, Volume2, VolumeX, MessageCircleQuestion } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
+import { TeacherChat, type TeacherAction } from '@/components/learn/TeacherChat'
 import { useTranslation } from '@/lib/hooks/use-translation'
 import { cn } from '@/lib/utils'
 
@@ -71,6 +72,7 @@ export interface QuizResult {
 
 export function ClassroomPlayer({
   doc,
+  sessionId,
   externalUrl,
   className,
   initialSceneIndex = 0,
@@ -80,6 +82,8 @@ export function ClassroomPlayer({
   completed = false,
 }: {
   doc: ClassroomDocument
+  /** Learning session id; enables "Ask the teacher" chat when set. */
+  sessionId?: string
   externalUrl?: string | null
   className?: string
   initialSceneIndex?: number
@@ -94,6 +98,9 @@ export function ClassroomPlayer({
   const [stepIdx, setStepIdx] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
+  const [teacherEffect, setTeacherEffect] = useState<Action | undefined>(undefined)
+  const [quizResults, setQuizResults] = useState<Record<string, QuizResult>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const hasAudio = useMemo(() => scenes.some((sc) => (sc.actions ?? []).some((a) => (a as SpeechWithAudio).audioUrl)), [scenes])
 
@@ -102,9 +109,19 @@ export function ClassroomPlayer({
 
   useEffect(() => {
     if (scene) onProgress?.(sceneIdx, scene.id)
+    setTeacherEffect(undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sceneIdx, scene?.id])
   const step = steps[stepIdx]
+
+  // A teacher answer can point at the slide (spotlight / laser); it overrides the step's own
+  // effect until the learner moves on, and pauses autoplay so the pointer is visible.
+  const onTeacherAction = useCallback((a: TeacherAction) => {
+    if (a.actionName === 'spotlight' || a.actionName === 'laser') {
+      setPlaying(false)
+      setTeacherEffect({ id: `teacher-${Date.now()}`, actionName: a.actionName, params: a.params } as unknown as Action)
+    }
+  }, [])
 
   const goScene = useCallback(
     (i: number) => {
@@ -174,6 +191,7 @@ export function ClassroomPlayer({
   const isQuiz = scene.content.type === 'quiz'
   const unsupported = !canvas && !isQuiz
   const isLast = sceneIdx === scenes.length - 1
+  const activeEffect = teacherEffect ?? step?.effect
 
   return (
     <div className={cn('flex flex-col gap-3 h-full min-h-0', className)}>
@@ -184,6 +202,12 @@ export function ClassroomPlayer({
           <h2 className="font-display text-lg font-semibold tracking-tight truncate">{scene.title}</h2>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
+          {sessionId && (
+            <Button variant={chatOpen ? 'secondary' : 'outline'} size="sm" onClick={() => setChatOpen((o) => !o)} aria-pressed={chatOpen}>
+              <MessageCircleQuestion className="h-4 w-4 mr-1.5" />
+              {t('learn.chat.askTeacher')}
+            </Button>
+          )}
           {externalUrl && (
             <Button variant="ghost" size="sm" asChild>
               <a href={externalUrl} target="_blank" rel="noopener noreferrer" title={t('learn.openInNewTab')}>
@@ -195,16 +219,24 @@ export function ClassroomPlayer({
       </div>
 
       {/* Stage */}
-      <div className="flex-1 min-h-0 grid grid-rows-[minmax(0,1fr)_auto] gap-3">
+      <div className={cn('flex-1 min-h-0 grid gap-3', chatOpen ? 'grid-cols-[minmax(0,1fr)_minmax(280px,34%)]' : 'grid-cols-1')}>
+      <div className="min-h-0 grid grid-rows-[minmax(0,1fr)_auto] gap-3">
         <div className="min-h-0 rounded-xl border bg-card shadow-soft overflow-hidden flex items-center justify-center p-3">
           {canvas ? (
             <div className="w-full h-full flex items-center justify-center">
               <div className="w-full max-h-full" style={{ aspectRatio: `${1 / (canvas.viewportRatio || 0.5625)}` }}>
-                <SlideCanvas key={scene.id} slide={canvas} effects={effectsFromAction(step?.effect)} className="w-full h-full" chrome={false} canvasPercentage={100} />
+                <SlideCanvas key={scene.id} slide={canvas} effects={effectsFromAction(activeEffect)} className="w-full h-full" chrome={false} canvasPercentage={100} />
               </div>
             </div>
           ) : isQuiz ? (
-            <QuizView key={scene.id} questions={scene.content.questions ?? []} onResult={(r) => onQuizResult?.(scene.id, r)} />
+            <QuizView
+              key={scene.id}
+              questions={scene.content.questions ?? []}
+              onResult={(r) => {
+                setQuizResults((q) => ({ ...q, [scene.id]: r }))
+                onQuizResult?.(scene.id, r)
+              }}
+            />
           ) : (
             <div className="text-center text-sm text-muted-foreground p-8">
               <p>{t('learn.player.unsupportedScene', { type: scene.content.type })}</p>
@@ -267,6 +299,17 @@ export function ClassroomPlayer({
             )}
           </div>
         </div>
+      </div>
+      {chatOpen && sessionId && (
+        <TeacherChat
+          sessionId={sessionId}
+          currentSceneId={scene.id}
+          quizResults={Object.keys(quizResults).length ? quizResults : undefined}
+          onAction={onTeacherAction}
+          onClose={() => setChatOpen(false)}
+          className="min-h-0"
+        />
+      )}
       </div>
 
       <audio ref={audioRef} preload="auto" className="hidden" />

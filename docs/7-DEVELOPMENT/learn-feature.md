@@ -106,8 +106,8 @@ details on demand, so notebooks larger than the prompt work.
 
 ## Roadmap
 
-
 - Per-notebook default model / TTS voice.
+- Whiteboard scenes in the native player.
 
 ## Native player
 
@@ -131,3 +131,52 @@ voices (`EDGE_VOICES` in `subscription-proxy.py`; default `EDGE_TTS_VOICE`). Gen
 player plays it and, in autoplay, advances on `ended` (reading-speed timing is the fallback
 when there is no audio or narration is muted). Browsers require a user gesture before audio
 starts — the first Play click counts.
+
+## Ask the teacher (in-app chat)
+
+The native player has an **Ask the teacher** panel. Questions go to
+`POST /api/learn/{id}/chat`, which relays OpenMAIC's stateless `/api/chat` (SSE) with the
+classroom document as `storeState`, the current scene, the learner's quiz results, and the
+default AI-teacher agent (`default-1`, QA session, one turn). OpenMAIC's chat runtime has no
+search tool (its SearXNG hook is generation-only), so the relay retrieves the top notebook
+passages for the question itself (`notebook_search_as_searxng`) and appends them in a
+`<notebook_context>` block on the last user message; the teacher cites them by bracketed
+title. Slide actions in the answer (`spotlight`, `laser`) are handed back to the player and
+override the step's effect until the learner moves on. Conversation state lives in the browser.
+
+## Learning progress
+
+Migration 26 adds learner state to `learning_session`: `learner` (scene/step position, scenes
+seen, per-scene quiz results), `completed_at`, `quiz_score` (mean of quiz scenes),
+`review_count`, `next_review_at`. The player reports through
+`PATCH /api/learn/{id}/progress`; completion schedules a spaced review (1/3/7/14/30 days,
+reset by a score under 60%). The Learn page shows Completed / Quiz % / Review-due badges and a
+"Due for review" section.
+
+## Learn from a question
+
+Migration 27 makes `learning_session.notebook` optional and records `question` and
+`scope_notebooks`. `POST /api/learn/from-question` (the **Learn this** button on Ask & Search)
+searches the selected notebooks (or all), bundles the hits as material and generates a
+classroom whose live retrieval is scoped to the same notebooks.
+
+## Free podcasts (Edge TTS)
+
+The subscription proxy serves `POST /v1/audio/speech` and `GET /v1/audio/voices` (edge-tts);
+`configure-claude-default.sh` registers an `openai_compatible` TTS model `edge-tts` on it,
+makes it the default TTS model and points the built-in podcast profiles at Haiku + Edge
+voices. `open_notebook/podcasts/models.py` maps `anthropic_compatible` to Esperanto's
+`anthropic` provider like `ModelManager` does.
+
+## Model limits and Test all
+
+Model records carry optional `context_window` / `max_tokens` (Settings > Models, sliders icon
+on a language model). `provision_langchain_model` switches to the large-context model at 85% of
+the chosen model's window (105k when unknown) and passes `max_tokens` through.
+`POST /api/models/test-all` runs a minimal real call against every model ("Test all models"
+button). The ChatGPT plan currently serves only `gpt-6-astra` via Codex.
+
+## Updating this fork
+
+`scripts/app/update-fork.sh` fetches upstream, rebases `main`, re-applies the Soft Fern theme,
+optionally bumps the OpenMAIC submodule (`--openmaic`) and rebuilds.
