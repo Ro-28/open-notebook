@@ -11,6 +11,9 @@ from api.models import (
     DefaultModelsResponse,
     ModelCreate,
     ModelResponse,
+    ModelTestAllItem,
+    ModelTestAllResponse,
+    ModelUpdate,
     ProviderAvailabilityResponse,
 )
 from open_notebook.ai.connection_tester import test_individual_model
@@ -188,6 +191,8 @@ async def get_models(
                 provider=model.provider,
                 type=model.type,
                 credential=model.credential,
+                context_window=model.context_window,
+                max_tokens=model.max_tokens,
                 created=str(model.created),
                 updated=str(model.updated),
             )
@@ -298,10 +303,56 @@ async def test_model(model_id: str):
         return ModelTestResponse(success=success, message=message)
     except Exception as e:
         logger.error(f"Error testing model {model_id}: {traceback.format_exc()}")
-        return ModelTestResponse(
-            success=False,
-            message=str(e)[:200],
-        )
+        return ModelTestResponse(success=False, message=str(e))
+
+
+@router.patch("/models/{model_id}", response_model=ModelResponse)
+async def update_model(model_id: str, body: ModelUpdate):
+    """Per-model limits (fork): context window and output token cap."""
+    try:
+        model = await Model.get(model_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Model not found")
+    if not model:
+        raise HTTPException(status_code=404, detail="Model not found")
+    data = body.model_dump(exclude_unset=True)
+    if "context_window" in data:
+        model.context_window = data["context_window"]
+    if "max_tokens" in data:
+        model.max_tokens = data["max_tokens"]
+    await model.save()
+    return ModelResponse(
+        id=str(model.id),
+        name=model.name,
+        provider=model.provider,
+        type=model.type,
+        credential=model.credential,
+        context_window=model.context_window,
+        max_tokens=model.max_tokens,
+        created=str(model.created),
+        updated=str(model.updated),
+    )
+
+
+@router.post("/models/test-all", response_model=ModelTestAllResponse)
+async def test_all_models():
+    """Test every registered model with a minimal real call (fork). Runs with bounded concurrency."""
+    import asyncio
+
+    models = await Model.get_all()
+    sem = asyncio.Semaphore(4)
+
+    async def one(m: Model) -> ModelTestAllItem:
+        async with sem:
+            try:
+                ok, msg = await test_individual_model(m)
+            except Exception as e:  # noqa: BLE001
+                ok, msg = False, str(e)
+        return ModelTestAllItem(id=str(m.id), name=m.name, provider=m.provider, type=m.type, success=ok, message=msg)
+
+    results = await asyncio.gather(*(one(m) for m in models))
+    passed = sum(1 for r in results if r.success)
+    return ModelTestAllResponse(results=list(results), passed=passed, failed=len(results) - passed)
 
 
 @router.get("/models/defaults", response_model=DefaultModelsResponse)

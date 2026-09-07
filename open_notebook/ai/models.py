@@ -54,11 +54,16 @@ async def _revalidate_config_urls(config: dict, provider: str) -> None:
 
 class Model(ObjectModel):
     table_name: ClassVar[str] = "model"
-    nullable_fields: ClassVar[set[str]] = {"credential"}
+    nullable_fields: ClassVar[set[str]] = {"credential", "context_window", "max_tokens"}
     name: str
     provider: str
     type: str
     credential: Optional[str] = None
+    # Optional per-model limits (fork). context_window drives the large-context
+    # switch in provision_langchain_model(); max_tokens is passed to the provider
+    # (Esperanto's default is 850 output tokens — far too small for many tasks).
+    context_window: Optional[int] = None
+    max_tokens: Optional[int] = None
 
     @classmethod
     async def get_models_by_type(cls, model_type):
@@ -232,6 +237,10 @@ class ModelManager:
                 # A base_url from a provisioned DB credential needs the same
                 # request-time re-validation the credential-linked path gets.
                 await _revalidate_config_urls(config, model.provider)
+
+        # Per-model output cap (fork): callers' explicit kwargs still win.
+        if model.type == "language" and model.max_tokens and "max_tokens" not in kwargs:
+            config["max_tokens"] = model.max_tokens
 
         # Merge any additional kwargs (e.g. temperature)
         config.update(kwargs)

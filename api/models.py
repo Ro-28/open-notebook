@@ -114,8 +114,32 @@ class ModelResponse(BaseModel):
     provider: str
     type: str
     credential: Optional[str] = None
+    context_window: Optional[int] = None
+    max_tokens: Optional[int] = None
     created: str
     updated: str
+
+
+class ModelUpdate(BaseModel):
+    """Per-model limits (fork): context window for the large-context switch, output cap."""
+
+    context_window: Optional[int] = Field(None, ge=1000, le=10_000_000)
+    max_tokens: Optional[int] = Field(None, ge=1, le=1_000_000)
+
+
+class ModelTestAllItem(BaseModel):
+    id: str
+    name: str
+    provider: str
+    type: str
+    success: bool
+    message: str
+
+
+class ModelTestAllResponse(BaseModel):
+    results: List[ModelTestAllItem]
+    passed: int
+    failed: int
 
 
 class DefaultModelsResponse(BaseModel):

@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
+import { TestAllModelsButton } from '@/components/settings/TestAllModelsButton'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Key, ShieldAlert, AlertCircle } from 'lucide-react'
@@ -90,12 +91,15 @@ export default function ApiKeysPage() {
       <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6">
           {/* Header */}
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-tight flex items-center gap-2">
-              <Key className="h-5 w-5 text-muted-foreground" />
-              {t('apiKeys.title')}
-            </h1>
-            <p className="text-muted-foreground mt-1">{t('apiKeys.description')}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="font-display text-2xl font-bold tracking-tight flex items-center gap-2">
+                <Key className="h-5 w-5 text-muted-foreground" />
+                {t('apiKeys.title')}
+              </h1>
+              <p className="text-muted-foreground mt-1">{t('apiKeys.description')}</p>
+            </div>
+            <TestAllModelsButton />
           </div>
 
           {/* Encryption warning */}

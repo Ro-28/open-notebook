@@ -4,7 +4,7 @@ import { modelsApi } from '@/lib/api/models'
 import { useToast } from '@/lib/hooks/use-toast'
 import { useTranslation } from '@/lib/hooks/use-translation'
 import { getApiErrorKey } from '@/lib/utils/error-handler'
-import { CreateModelRequest, ModelDefaults, ModelTestResult } from '@/lib/types/models'
+import { CreateModelRequest, ModelDefaults, ModelLimitsUpdate, ModelTestAllResult, ModelTestResult } from '@/lib/types/models'
 
 export const MODEL_QUERY_KEYS = {
   models: ['models'] as const,
@@ -76,6 +76,34 @@ export function useDeleteModel() {
       })
     },
   })
+}
+
+/** Per-model limits (fork) */
+export function useUpdateModelLimits() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const { t } = useTranslation()
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ModelLimitsUpdate }) => modelsApi.updateLimits(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MODEL_QUERY_KEYS.models })
+      toast({ title: t('models.limitsSaved') })
+    },
+    onError: (error: unknown) => {
+      toast({ title: t('common.error'), description: getApiErrorKey(error, t('common.error')), variant: 'destructive' })
+    },
+  })
+}
+
+/** Test every model (fork) */
+export function useTestAllModels() {
+  const [result, setResult] = useState<ModelTestAllResult | null>(null)
+  const mutation = useMutation({
+    mutationFn: () => modelsApi.testAll(),
+    onSuccess: (data) => setResult(data),
+  })
+  return { ...mutation, result, clearResult: () => setResult(null) }
 }
 
 export function useModelDefaults() {

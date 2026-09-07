@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ModelLimitsPopover } from '@/components/settings/ModelLimitsPopover'
 import {
   Key,
   AlertTriangle,
@@ -175,6 +176,14 @@ export function CredentialItem({
                         >
                           {model.name}
                           {defaultSlot && <span className="ml-0.5 opacity-75">({defaultSlot})</span>}
+                          {model.type === 'language' && (model.context_window || model.max_tokens) ? (
+                            <span className="ml-0.5 opacity-60 text-[10px]">
+                              {model.context_window ? `${Math.round(model.context_window / 1000)}k` : ''}
+                              {model.context_window && model.max_tokens ? '/' : ''}
+                              {model.max_tokens ? `${model.max_tokens}` : ''}
+                            </span>
+                          ) : null}
+                          {model.type === 'language' && <ModelLimitsPopover model={model} />}
                           <button
                             className="ml-0.5 opacity-0 group-hover/model:opacity-60 hover:!opacity-100 transition-opacity"
                             onClick={() => testModel(model.id, model.name)}

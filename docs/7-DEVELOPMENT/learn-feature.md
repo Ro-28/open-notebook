@@ -61,13 +61,13 @@ uses — so nothing is stored by the proxy:
 
 | Route | Upstream | Notes |
 |---|---|---|
-| `POST /v1/chat/completions` | ChatGPT/Codex OAuth (`gpt-5.5`, `gpt-5.6`, `gpt-6-astra`) or Claude OAuth (`claude-*`) | OpenAI-compatible; **automatic failover** through `FALLBACK_CHAIN` (default `codex:gpt-5.5,anthropic:claude-haiku-4-5-20251001`). Response header `x-proxy-served-by` tells you who answered; `x-proxy-failover` lists what failed. |
+| `POST /v1/chat/completions` | ChatGPT/Codex OAuth (`gpt-6-astra` — the model the ChatGPT plan currently serves via Codex) or Claude OAuth (`claude-*`) | OpenAI-compatible; **automatic failover** through `FALLBACK_CHAIN` (default `codex:gpt-6-astra,anthropic:claude-haiku-4-5-20251001`). Response header `x-proxy-served-by` tells you who answered; `x-proxy-failover` lists what failed. |
 | `POST /v1/messages` | Claude OAuth | Native Anthropic API (streaming/thinking preserved); failover only across Claude models. |
 | `GET /v1/models` | — | model list for OpenMAIC's probe |
 
 The generated `vendor/openmaic/.env` registers it twice: as the `openrouter`
 provider slot (OpenAI-compatible, all subscription models, failover) and as
-`anthropic` (native). Pick with e.g. `DEFAULT_MODEL=openrouter:gpt-5.5` or
+`anthropic` (native). Pick with e.g. `DEFAULT_MODEL=openrouter:gpt-6-astra` or
 `anthropic:claude-sonnet-5`, or per stage via `MODEL_ROUTES`. Proxy env knobs:
 `CODEX_MODELS`, `ANTHROPIC_SUB_MODELS`, `FALLBACK_CHAIN`, `SUBSCRIPTION_PROXY_PORT`.
 

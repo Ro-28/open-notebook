@@ -45,7 +45,7 @@ for c in $CLAUDE $CODEX $OLLAMA; do curl -s -X POST "$API/credentials/$c/test" |
 
 echo "== register"
 register "$CLAUDE" anthropic_compatible language claude-haiku-4-5-20251001 claude-sonnet-5 claude-fable-5-1
-register "$CODEX" openai_compatible language gpt-5.5 gpt-5.6 gpt-6-astra
+register "$CODEX" openai_compatible language gpt-6-astra
 register "$OLLAMA" ollama embedding nomic-embed-text
 register "$TTS" openai_compatible text_to_speech edge-tts
 
@@ -78,4 +78,25 @@ for s in json.load(open("/tmp/sp.json")):
     if not s.get("voice_model"):
         body = {"name": s["name"], "description": s.get("description"), "voice_model": edge, "speakers": s["speakers"]}
         print(" speaker", s["name"], put(f"/speaker-profiles/{s['id']}", body))
+PY
+
+echo "== model limits (context window / max output) for known models"
+curl -s "$API/models" -o /tmp/models.json
+python3 - "$API" <<'PY'
+import json, sys, urllib.request
+api = sys.argv[1]
+LIMITS = {  # name prefix -> (context_window, max_tokens)
+    "claude-haiku-4-5": (200_000, 8_192), "claude-sonnet-5": (1_000_000, 16_384), "claude-fable-5-1": (1_000_000, 16_384),
+    "gpt-6-astra": (1_000_000, 32_768),
+}
+for m in json.load(open("/tmp/models.json")):
+    if m["type"] != "language" or m.get("context_window"):
+        continue
+    for prefix, (ctx, out) in LIMITS.items():
+        if m["name"].startswith(prefix):
+            req = urllib.request.Request(f"{api}/models/{m['id']}", data=json.dumps({"context_window": ctx, "max_tokens": out}).encode(),
+                                         method="PATCH", headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                print(" ", m["name"], ctx, out, r.status)
+            break
 PY

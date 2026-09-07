@@ -41,7 +41,7 @@ sys.path.insert(0, str(HERMES_AGENT))
 # ---------------------------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------------------------
-CODEX_MODELS = [m for m in os.environ.get("CODEX_MODELS", "gpt-5.5,gpt-5.6,gpt-6-astra").split(",") if m]
+CODEX_MODELS = [m for m in os.environ.get("CODEX_MODELS", "gpt-6-astra").split(",") if m]
 ANTHROPIC_MODELS = [
     m
     for m in os.environ.get(
@@ -51,7 +51,7 @@ ANTHROPIC_MODELS = [
 ]
 # Tried in order after the requested model fails. provider is "codex" or "anthropic".
 FALLBACK_CHAIN: List[Tuple[str, str]] = []
-for item in os.environ.get("FALLBACK_CHAIN", "codex:gpt-5.5,anthropic:claude-haiku-4-5-20251001").split(","):
+for item in os.environ.get("FALLBACK_CHAIN", "codex:gpt-6-astra,anthropic:claude-haiku-4-5-20251001").split(","):
     if ":" in item:
         prov, mdl = item.split(":", 1)
         FALLBACK_CHAIN.append((prov.strip(), mdl.strip()))
@@ -281,7 +281,7 @@ def provider_for(model: str) -> str:
 
 
 def chat_with_failover(data: Dict[str, Any]) -> Tuple[Dict[str, Any], str, List[str]]:
-    requested = data.get("model") or (CODEX_MODELS[0] if CODEX_MODELS else "gpt-5.5")
+    requested = data.get("model") or (CODEX_MODELS[0] if CODEX_MODELS else "gpt-6-astra")
     attempts: List[Tuple[str, str]] = [(provider_for(requested), requested)]
     attempts += [a for a in FALLBACK_CHAIN if a not in attempts]
     errors: List[str] = []

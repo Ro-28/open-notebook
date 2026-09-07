@@ -21,6 +21,7 @@ vi.mock('@/components/settings', () => ({
 vi.mock('@/lib/hooks/use-models', () => ({
   useModels: vi.fn(() => ({ data: [], isLoading: false })),
   useModelDefaults: vi.fn(() => ({ data: null, isLoading: false })),
+  useTestAllModels: vi.fn(() => ({ mutate: vi.fn(), isPending: false, result: null, clearResult: vi.fn() })),
 }))
 
 const mockUseCredentials = vi.fn()

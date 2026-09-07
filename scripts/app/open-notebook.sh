@@ -157,32 +157,25 @@ start_openmaic() {
     log "Creating vendor/openmaic/.env"
     # Read a key from the environment or ~/.hermes/.env
     read_key() { local v="${!1:-}"; [ -z "$v" ] && [ -f "$HOME/.hermes/.env" ] && v="$(grep -E "^$1=" "$HOME/.hermes/.env" | head -1 | cut -d= -f2- | tr -d '"'"'"'')"; printf '%s' "$v"; }
-    local ollama_key cline_key default_model=""
-    ollama_key="$(read_key OLLAMA_API_KEY)"; cline_key="$(read_key CLINE_API_KEY)"
+    local cline_key
+    cline_key="$(read_key CLINE_API_KEY)"
     {
       echo "# OpenMAIC sidecar config for Open Notebook's Learn feature (generated; edit freely)."
       echo "# Model strings are provider:model. Resolution: MODEL_ROUTES > DEFAULT_MODEL."
       echo
-      if [ -n "$ollama_key" ]; then
-        echo "# --- Ollama Cloud (OpenAI-compatible). Free tier: gpt-oss:120b, gpt-oss:20b, gemma4:31b, nemotron-3-nano:30b"
-        echo "OPENAI_API_KEY=$ollama_key"
-        echo "OPENAI_BASE_URL=https://ollama.com/v1"
-        echo "OPENAI_MODELS=gpt-oss:120b,gpt-oss:20b,gemma4:31b,nemotron-3-nano:30b,glm-5.3,deepseek-v4-flash:0731"
-        default_model="openai:gpt-oss:120b"
-      elif [ -n "$cline_key" ]; then
-        echo "# --- Cline relay (OpenAI-compatible)"
+      if [ -n "$cline_key" ]; then
+        echo "# --- Optional extra provider: Cline relay (OpenAI-compatible, pay-per-use)"
         echo "OPENAI_API_KEY=$cline_key"
         echo "OPENAI_BASE_URL=https://api.cline.bot/api/v1"
         echo "OPENAI_MODELS=z-ai/glm-5.3,deepseek/deepseek-v4-flash-0731"
-        default_model="openai:z-ai/glm-5.3"
+        echo
       fi
-      echo
       echo "# --- Subscriptions (OAuth, no API keys) via the local subscription-proxy started by this launcher."
       echo "# ChatGPT (Codex) + Claude through an OpenAI-compatible endpoint WITH automatic failover"
-      echo "# (order: requested model -> gpt-5.5 -> claude-haiku-4-5). Registered as the 'openrouter' provider slot."
+      echo "# (order: requested model -> gpt-6-astra -> claude-haiku-4-5). Registered as the 'openrouter' provider slot."
       echo "OPENROUTER_API_KEY=subscription"
       echo "OPENROUTER_BASE_URL=http://127.0.0.1:$SUB_PROXY_PORT/v1"
-      echo "OPENROUTER_MODELS=gpt-5.5,gpt-5.6,gpt-6-astra,claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
+      echo "OPENROUTER_MODELS=gpt-6-astra,claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
       echo "# Teacher voice: OpenAI-compatible TTS served by the proxy (Microsoft Edge neural voices via edge-tts, free)"
       echo "TTS_OPENAI_API_KEY=subscription"
       echo "TTS_OPENAI_BASE_URL=http://127.0.0.1:$SUB_PROXY_PORT/v1"
@@ -190,12 +183,10 @@ start_openmaic() {
       echo "ANTHROPIC_API_KEY=subscription"
       echo "ANTHROPIC_BASE_URL=http://127.0.0.1:$SUB_PROXY_PORT/v1"
       echo "ANTHROPIC_MODELS=claude-haiku-4-5-20251001,claude-sonnet-5,claude-fable-5-1"
-      [ -z "$default_model" ] && default_model="openrouter:gpt-5.5"
       echo
       echo "# Default: Claude Haiku on the subscription (fast, cheap). Alternatives: anthropic:claude-sonnet-5,"
-      echo "# openrouter:gpt-5.5 (ChatGPT), openai:gpt-oss:120b (Ollama Cloud). Per-stage: MODEL_ROUTES."
+      echo "# openrouter:gpt-6-astra (ChatGPT). Per-stage: MODEL_ROUTES."
       echo "DEFAULT_MODEL=anthropic:claude-haiku-4-5-20251001"
-      echo "# Previous auto-pick: $default_model"
       echo "# 'Web search' for classrooms = live retrieval from Open Notebook (SearXNG-compatible endpoint)"
       echo "SEARXNG_BASE_URL=http://127.0.0.1:$API_PORT/api/learn/searxng"
       echo "# Let Open Notebook embed classrooms in its Learn dialog"

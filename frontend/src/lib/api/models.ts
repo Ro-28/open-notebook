@@ -10,6 +10,8 @@ import {
   ProviderModelCount,
   AutoAssignResult,
   ModelTestResult,
+  ModelLimitsUpdate,
+  ModelTestAllResult,
 } from '@/lib/types/models'
 
 export const modelsApi = {
@@ -101,6 +103,18 @@ export const modelsApi = {
    */
   testModel: async (modelId: string): Promise<ModelTestResult> => {
     const response = await apiClient.post<ModelTestResult>(`/models/${modelId}/test`)
+    return response.data
+  },
+
+  /** Per-model limits (fork): context window / output cap */
+  updateLimits: async (modelId: string, data: ModelLimitsUpdate): Promise<Model> => {
+    const response = await apiClient.patch<Model>(`/models/${modelId}`, data)
+    return response.data
+  },
+
+  /** Test every registered model (fork) */
+  testAll: async (): Promise<ModelTestAllResult> => {
+    const response = await apiClient.post<ModelTestAllResult>('/models/test-all')
     return response.data
   },
 }

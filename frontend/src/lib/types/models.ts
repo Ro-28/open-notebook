@@ -4,8 +4,21 @@ export interface Model {
   provider: string
   type: 'language' | 'embedding' | 'text_to_speech' | 'speech_to_text'
   credential?: string | null
+  context_window?: number | null
+  max_tokens?: number | null
   created: string
   updated: string
+}
+
+export interface ModelLimitsUpdate {
+  context_window?: number | null
+  max_tokens?: number | null
+}
+
+export interface ModelTestAllResult {
+  results: { id: string; name: string; provider: string; type: string; success: boolean; message: string }[]
+  passed: number
+  failed: number
 }
 
 export interface CreateModelRequest {

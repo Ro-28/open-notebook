@@ -20,8 +20,30 @@ async def provision_langchain_model(
     model = None
     selection_reason = ""
 
-    if tokens > 105_000:
-        selection_reason = f"large_context (content has {tokens} tokens)"
+    # Fork: the large-context switch honours the chosen model's own context window when it
+    # is known (Settings > Models), instead of a fixed 105k threshold. Leave ~15% headroom.
+    threshold = 105_000
+    try:
+        from open_notebook.ai.models import Model
+        from open_notebook.ai.models import model_manager as _mm
+
+        chosen_id = model_id
+        if not chosen_id:
+            defaults = await _mm.get_defaults()
+            chosen_id = {
+                "chat": defaults.default_chat_model,
+                "transformation": defaults.default_transformation_model or defaults.default_chat_model,
+                "tools": defaults.default_tools_model or defaults.default_chat_model,
+            }.get(default_type)
+        if chosen_id:
+            chosen = await Model.get(chosen_id)
+            if chosen and chosen.context_window:
+                threshold = int(chosen.context_window * 0.85)
+    except Exception as e:  # noqa: BLE001 - never block provisioning on the lookup
+        logger.debug(f"context_window lookup skipped: {e}")
+
+    if tokens > threshold:
+        selection_reason = f"large_context (content has {tokens} tokens > {threshold})"
         logger.debug(
             f"Using large context model because the content has {tokens} tokens"
         )
