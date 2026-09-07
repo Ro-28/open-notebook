@@ -321,6 +321,15 @@ EDGE_VOICES = {
     "verse": "en-US-SteffanNeural",
 }
 DEFAULT_EDGE_VOICE = os.environ.get("EDGE_TTS_VOICE", "en-US-AndrewMultilingualNeural")
+# Additional voices exposed by name (podcast speaker pickers); any Edge ShortName also works directly.
+EXTRA_EDGE_VOICES = [
+    "en-US-AvaMultilingualNeural", "en-US-AndrewMultilingualNeural", "en-US-EmmaMultilingualNeural",
+    "en-US-BrianMultilingualNeural", "en-GB-SoniaNeural", "en-GB-RyanNeural", "en-AU-NatashaNeural",
+    "es-ES-AlvaroNeural", "es-ES-ElviraNeural", "es-MX-DaliaNeural", "es-MX-JorgeNeural",
+    "pt-BR-FranciscaNeural", "pt-BR-AntonioNeural", "fr-FR-DeniseNeural", "fr-FR-HenriNeural",
+    "de-DE-KatjaNeural", "de-DE-ConradNeural", "it-IT-ElsaNeural", "it-IT-DiegoNeural",
+    "ja-JP-NanamiNeural", "zh-CN-XiaoxiaoNeural", "zh-CN-YunxiNeural",
+]
 
 
 def edge_voice_for(voice: Optional[str]) -> str:
@@ -407,13 +416,25 @@ class Handler(BaseHTTPRequestHandler):
                              "anthropic_models": ANTHROPIC_MODELS, "fallback_chain": FALLBACK_CHAIN,
                              "tts": {"engine": "edge-tts", "default_voice": DEFAULT_EDGE_VOICE,
                                      "voices": sorted(EDGE_VOICES)}})
+        elif path.endswith("/audio/voices"):
+            # Esperanto's openai_compatible TTS probes this to populate voice pickers (podcast speakers).
+            voices = [
+                {"id": k, "name": f"{k} ({v})", "gender": "NEUTRAL", "language_code": v[:5],
+                 "description": f"Microsoft Edge neural voice {v}"}
+                for k, v in EDGE_VOICES.items()
+            ]
+            voices += [
+                {"id": v, "name": v, "gender": "NEUTRAL", "language_code": v[:5], "description": "Microsoft Edge neural voice"}
+                for v in EXTRA_EDGE_VOICES
+            ]
+            self._json(200, {"voices": voices})
         elif path.endswith("/models"):
             now = int(time.time())
             self._json(200, {"object": "list", "data": [
                 {"id": m, "object": "model", "created": now, "owned_by": "openai-subscription"} for m in CODEX_MODELS
             ] + [
                 {"id": m, "object": "model", "created": now, "owned_by": "anthropic-subscription"} for m in ANTHROPIC_MODELS
-            ]})
+            ] + [{"id": "edge-tts", "object": "model", "created": now, "owned_by": "edge-tts"}]})
         else:
             self._error(404, f"unknown path {path}")
 

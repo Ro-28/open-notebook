@@ -30,7 +30,18 @@ async def _resolve_model_config(
         await provision_provider_keys(model.provider)
     if max_tokens is not None:
         config = {**config, "max_tokens": max_tokens}
-    return (model.provider, model.name, config)
+    # Same provider mapping ModelManager.get_model() applies: esperanto has no
+    # "anthropic_compatible" provider — it is Anthropic with a custom base_url.
+    provider = model.provider
+    if provider == "anthropic_compatible":
+        from open_notebook.ai.connection_tester import (
+            normalize_anthropic_compatible_base_url,
+        )
+
+        if config.get("base_url"):
+            config["base_url"] = normalize_anthropic_compatible_base_url(str(config["base_url"]))
+        provider = "anthropic"
+    return (provider, model.name, config)
 
 
 class EpisodeProfile(ObjectModel):
